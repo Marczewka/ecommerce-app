@@ -4,14 +4,13 @@ import {
   decimal,
   integer,
   pgTable,
-  serial,
   text,
   timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   role: varchar("role", { length: 255 }).notNull().default("client"),
@@ -19,7 +18,7 @@ export const users = pgTable("users", {
 });
 
 export const categories = pgTable("categories", {
-  id: serial("id").primaryKey(),
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
 });
@@ -27,7 +26,7 @@ export const categories = pgTable("categories", {
 export const products = pgTable(
   "products",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     categoryId: integer("category_id").references(() => categories.id),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
@@ -45,7 +44,7 @@ export const products = pgTable(
 export const orders = pgTable(
   "orders",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     userId: integer("user_id").references(() => users.id),
     totalPrice: decimal("total_price", { precision: 12, scale: 2 }).notNull(),
     status: varchar("status", { length: 255 }).default("pending"),
@@ -58,7 +57,7 @@ export const orders = pgTable(
 export const orderItems = pgTable(
   "order_items",
   {
-    id: serial("id").primaryKey(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     orderId: integer("order_id").references(() => orders.id),
     productId: integer("product_id").references(() => products.id),
     orderQuantity: integer("order_quantity").notNull(),
@@ -69,3 +68,18 @@ export const orderItems = pgTable(
     check("unit_price_check", sql`${table.unitPrice} >= 0`),
   ],
 );
+
+export type InsertUser = typeof users.$inferInsert;
+export type SelectUser = typeof users.$inferSelect;
+
+export type InsertCategories = typeof categories.$inferInsert;
+export type SelectCategories = typeof categories.$inferSelect;
+
+export type InsertProducts = typeof products.$inferInsert;
+export type SelectProducts = typeof products.$inferSelect;
+
+export type InsertOrders = typeof orders.$inferInsert;
+export type SelectOrders = typeof orders.$inferSelect;
+
+export type InsertOrderItems = typeof orderItems.$inferInsert;
+export type SelectOrderItems = typeof orderItems.$inferSelect;
