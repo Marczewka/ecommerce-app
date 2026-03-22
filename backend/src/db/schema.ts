@@ -33,7 +33,7 @@ export const products = pgTable(
     price: decimal("price", { precision: 12, scale: 2 }).notNull(),
     description: text("description"),
     categoryId: integer("category_id")
-      .references(() => categories.id, { onDelete: "cascade" })
+      .references(() => categories.id, { onDelete: "restrict" })
       .notNull(),
     images: text("images").array(),
   },
@@ -45,7 +45,7 @@ export const orders = pgTable(
   {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     userId: integer("user_id")
-      .references(() => users.id, { onDelete: "cascade" })
+      .references(() => users.id, { onDelete: "restrict" })
       .notNull(),
     totalPrice: decimal("total_price", { precision: 12, scale: 2 }).notNull(),
     status: varchar("status", { length: 255 }).default("pending"),
@@ -60,10 +60,10 @@ export const orderItems = pgTable(
   {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     orderId: integer("order_id")
-      .references(() => orders.id, { onDelete: "cascade" })
+      .references(() => orders.id, { onDelete: "restrict" })
       .notNull(),
     productId: integer("product_id")
-      .references(() => products.id, { onDelete: "cascade" })
+      .references(() => products.id, { onDelete: "restrict" })
       .notNull(),
     unitPrice: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
   },

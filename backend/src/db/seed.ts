@@ -42,10 +42,10 @@ async function main() {
       })),
     );
 
-    console.log("✅ Database successfully seeded!");
+    console.log("Database successfully seeded!");
     process.exit(0);
   } catch (error) {
-    console.error("❌ Seeding failed:", error);
+    console.error("Seeding failed:", error);
     process.exit(1);
   }
 }
