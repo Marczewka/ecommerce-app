@@ -1,40 +1,37 @@
 import express from "express";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { products } from "../db/schema.js";
+import { orders } from "../db/schema.js";
 
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  const allProducts = await db.select().from(products);
-  res.json(allProducts);
+  const allOrders = await db.select().from(orders);
+  res.json(allOrders);
 });
 
-router.get("/:productSlug", async (req, res) => {
-  const { productSlug } = req.params;
-  const product = await db
+router.get("/:id", async (req, res) => {
+  const { id } = req.params;
+  const order = await db
     .select()
-    .from(products)
-    .where(eq(products.slug, productSlug));
+    .from(orders)
+    .where(eq(orders.id, Number(id)));
 
-  if (product.length === 0) return res.status(404).json({ error: "Not found" });
-  res.json(product[0]);
+  if (order.length === 0) return res.status(404).json({ error: "Not found" });
+  res.json(order[0]);
 });
 
 router.post("/", async (req, res) => {
-  const insertedProduct = await db
-    .insert(products)
-    .values(req.body)
-    .returning();
+  const insertedProduct = await db.insert(orders).values(req.body).returning();
   res.status(201).json(insertedProduct[0]);
 });
 
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const updatedProduct = await db
-    .update(products)
+    .update(orders)
     .set(req.body)
-    .where(eq(products.id, Number(id)))
+    .where(eq(orders.id, Number(id)))
     .returning();
 
   if (updatedProduct.length === 0)
@@ -45,8 +42,8 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   const deletedProduct = await db
-    .delete(products)
-    .where(eq(products.id, Number(id)))
+    .delete(orders)
+    .where(eq(orders.id, Number(id)))
     .returning();
 
   if (deletedProduct.length === 0)
