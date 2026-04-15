@@ -1,15 +1,17 @@
 import express from "express";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { categories } from "../db/schema.js";
+import { categories, products } from "../db/schema.js";
 
 const router = express.Router();
 
+// GET /
 router.get("/", async (req, res) => {
-  const allCategories = db.select().from(categories);
+  const allCategories = await db.select().from(categories);
   res.json(allCategories);
 });
 
+// GET /:categorySlug
 router.get("/:categorySlug", async (req, res) => {
   const { categorySlug } = req.params;
   const category = await db
@@ -22,6 +24,7 @@ router.get("/:categorySlug", async (req, res) => {
   res.json(category[0]);
 });
 
+// POST /
 router.post("/", async (req, res) => {
   const insertedCategory = await db
     .insert(categories)
@@ -30,6 +33,7 @@ router.post("/", async (req, res) => {
   res.status(201).json(insertedCategory[0]);
 });
 
+// PUT /:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const updatedCategory = await db
@@ -42,6 +46,7 @@ router.put("/:id", async (req, res) => {
   res.json(updatedCategory[0]);
 });
 
+// DELETE /:id
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   const deletedCategory = await db
@@ -52,3 +57,5 @@ router.delete("/:id", async (req, res) => {
     return res.status(404).json({ error: "Not found" });
   res.json(deletedCategory[0]);
 });
+
+export default router;

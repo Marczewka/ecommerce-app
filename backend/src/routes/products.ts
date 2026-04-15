@@ -1,15 +1,34 @@
 import express from "express";
 import { eq } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { products } from "../db/schema.js";
+import { products, categories } from "../db/schema.js";
 
 const router = express.Router();
 
+// GET /?categorySlug=categorySlug
 router.get("/", async (req, res) => {
-  const allProducts = await db.select().from(products);
-  res.json(allProducts);
+  const { categorySlug } = req.query;
+  let query = db
+    .select({
+      id: products.id,
+      title: products.title,
+      slug: products.slug,
+      price: products.price,
+      description: products.description,
+      images: products.images,
+      categorySlug: categories.slug,
+    })
+    .from(products)
+    .innerJoin(categories, eq(products.categoryId, categories.id))
+    .$dynamic();
+  if (typeof categorySlug === "string") {
+    query = query.where(eq(categories.slug, categorySlug));
+  }
+  const filteredProducts = await query;
+  res.json(filteredProducts);
 });
 
+// GET /:productSlug
 router.get("/:productSlug", async (req, res) => {
   const { productSlug } = req.params;
   const product = await db
@@ -21,6 +40,7 @@ router.get("/:productSlug", async (req, res) => {
   res.json(product[0]);
 });
 
+// POST /
 router.post("/", async (req, res) => {
   const insertedProduct = await db
     .insert(products)
@@ -29,6 +49,7 @@ router.post("/", async (req, res) => {
   res.status(201).json(insertedProduct[0]);
 });
 
+// PUT /:id
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const updatedProduct = await db
@@ -42,6 +63,7 @@ router.put("/:id", async (req, res) => {
   res.json(updatedProduct[0]);
 });
 
+// DELETE /:id
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   const deletedProduct = await db
