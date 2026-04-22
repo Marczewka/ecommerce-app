@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+.btn {
+  @apply flex p-2;
+  &:hover {
+    @apply bg-slate-600;
+  }
+  &:active {
+    @apply bg-slate-500;
+  }
+  &:focus {
+    @apply ring-2 outline-none;
+  }
+}

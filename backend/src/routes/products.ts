@@ -1,31 +1,31 @@
 import express from "express";
-import { eq } from "drizzle-orm";
+import { and, eq, ilike } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { products, categories } from "../db/schema.js";
 
 const router = express.Router();
 
-// GET /?categorySlug=categorySlug
+// GET /?search=searchQuery
 router.get("/", async (req, res) => {
-  const { categorySlug } = req.query;
-  let query = db
+  const { search } = req.query;
+
+  const filters = [];
+
+  if (search) {
+    filters.push(ilike(products.title, `%${search}%`));
+  }
+
+  const productList = await db
     .select({
       id: products.id,
       title: products.title,
-      slug: products.slug,
       price: products.price,
-      description: products.description,
-      images: products.images,
-      categorySlug: categories.slug,
+      image: products.image,
     })
     .from(products)
-    .innerJoin(categories, eq(products.categoryId, categories.id))
-    .$dynamic();
-  if (typeof categorySlug === "string") {
-    query = query.where(eq(categories.slug, categorySlug));
-  }
-  const filteredProducts = await query;
-  res.json(filteredProducts);
+    .where(and(...filters));
+
+  res.json(productList);
 });
 
 // GET /:productSlug

@@ -1,28 +1,23 @@
 import { useState, useEffect } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import type { GetCategoryFromSlugResponse } from "../../../backend/src/types/categories";
+import { useSearchParams } from "react-router-dom";
+import type { GetAllProductsResponse } from "../../../backend/src/types/products";
 
 export default function Category() {
-  const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
-  const [data, setData] = useState<GetCategoryFromSlugResponse | null>(null);
+  const [products, setProducts] = useState<GetAllProductsResponse | null>(null);
 
   const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
-    fetch(
-      `http://localhost:5000/api/categories/${categorySlug}?search=${searchQuery}`,
-    )
+    fetch(`http://localhost:5000/api/products?search=${searchQuery}`)
       .then((res) => res.json())
-      .then((data) => setData(data));
-  }, [categorySlug, searchQuery]);
+      .then((data) => setProducts(data));
+  }, [searchQuery]);
 
   return (
     <main>
       <div className="flex flex-col">
-        <h1 className="mb-8 text-center text-4xl font-bold">
-          {data?.categoryName}
-        </h1>
+        <h1 className="mb-8 text-center text-4xl font-bold">products</h1>
         <div className="flex text-2xl">
           {searchQuery && (
             <p className="text-2xl text-gray-600">
@@ -32,12 +27,12 @@ export default function Category() {
         </div>
       </div>
       <ul className="grid grid-cols-[repeat(auto-fit,min(200px))] justify-center justify-items-center gap-8">
-        {data?.products.map((product) => (
+        {products?.map((product) => (
           <li
             key={product.id}
-            className="group w-48 overflow-hidden rounded-lg shadow-lg"
+            className="group flex w-48 flex-col overflow-hidden rounded-lg shadow-lg"
           >
-            <div className="h-48 bg-white p-2">
+            <div className="h-48 bg-gray-100 p-2">
               {product.image && product.image.length > 0 && (
                 <img
                   src={product.image}
