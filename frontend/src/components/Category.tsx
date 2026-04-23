@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import type { GetCategoryFromSlugResponse } from "../../../backend/src/types/categories";
+import type { GetCategoryFromSlugResponse } from "../../../shared/types/categories";
+import ProductCard from "./ProductCard";
 
 export default function Category() {
   const { categorySlug } = useParams();
@@ -20,38 +21,19 @@ export default function Category() {
   return (
     <main>
       <div className="flex flex-col">
-        <h1 className="mb-8 text-center text-4xl font-bold">
+        <h1 className="mb-8 text-center text-4xl font-bold capitalize">
           {data?.categoryName}
         </h1>
-        <div className="flex text-2xl">
-          {searchQuery && (
-            <p className="text-2xl text-gray-600">
-              Search results for <span className="italic">"{searchQuery}"</span>
-            </p>
-          )}
-        </div>
+        {searchQuery && (
+          <p className="p-6 text-2xl text-gray-600">
+            Search results for <span className="italic">"{searchQuery}"</span>
+          </p>
+        )}
       </div>
       <ul className="grid grid-cols-[repeat(auto-fit,min(200px))] justify-center justify-items-center gap-8">
         {data?.products.map((product) => (
-          <li
-            key={product.id}
-            className="group w-48 overflow-hidden rounded-lg shadow-lg"
-          >
-            <div className="h-48 bg-white p-2">
-              {product.image && product.image.length > 0 && (
-                <img
-                  src={product.image}
-                  alt={product.title}
-                  className="h-full w-full object-contain"
-                />
-              )}
-            </div>
-            <div className="bg-white pl-4 transition-colors group-hover:bg-gray-200">
-              <div className="line-clamp-2 h-14 align-middle text-lg">
-                {product.title}
-              </div>
-              <div className="test-xxl">${product.price}</div>
-            </div>
+          <li key={product.slug}>
+            <ProductCard product={product} />
           </li>
         ))}
       </ul>

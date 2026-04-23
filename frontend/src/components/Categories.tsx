@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import type { SelectCategories } from "../../../backend/src/db/schema";
+import { NavLink, useLocation } from "react-router-dom";
+import type { GetAllCategoriesResponse } from "../../../shared/types/categories";
 
 export default function Categories(props: { closeMenu: () => void }) {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<GetAllCategoriesResponse>([]);
+  const location = useLocation();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/categories")
@@ -14,17 +15,26 @@ export default function Categories(props: { closeMenu: () => void }) {
   return (
     <aside className="absolute top-10 left-1/2 w-48 -translate-x-1/2 border bg-slate-500 p-2">
       <ul>
-        {categories.map((category: SelectCategories) => (
-          <li key={category.id} onClick={props.closeMenu}>
+        {categories.map((category) => (
+          <li key={category.slug} onClick={props.closeMenu}>
             <NavLink
-              to={`/categories/${category.slug}`}
+              to={`/categories/${category.slug}${location.search}`}
               draggable="false"
-              className="btn block"
+              className="btn block capitalize"
             >
               {category.name}
             </NavLink>
           </li>
         ))}
+        <li onClick={props.closeMenu}>
+          <NavLink
+            to={`/products${location.search}`}
+            draggable="false"
+            className="btn block"
+          >
+            All Products
+          </NavLink>
+        </li>
       </ul>
     </aside>
   );

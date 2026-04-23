@@ -2,10 +2,10 @@ import { sql } from "drizzle-orm";
 import {
   check,
   decimal,
+  index,
   integer,
   pgTable,
   text,
-  timestamp,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -28,7 +28,11 @@ export const products = pgTable(
       .notNull(),
     image: text("image"),
   },
-  (table) => [check("price_check", sql`${table.price} >= 0`)],
+  (table) => [
+    check("price_check", sql`${table.price} >= 0`),
+    index("title_trgm_idx").using("gin", sql`${table.title} gin_trgm_ops`),
+    index("category_id_idx").on(table.categoryId),
+  ],
 );
 
 export type InsertCategories = typeof categories.$inferInsert;

@@ -18,7 +18,9 @@ export default function SearchBar() {
     }
 
     navigate({
-      pathname: location.pathname,
+      pathname: location.pathname.startsWith("/products/")
+        ? "/products"
+        : location.pathname,
       search: newParams.toString(),
     });
   };

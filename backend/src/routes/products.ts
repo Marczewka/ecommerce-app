@@ -1,5 +1,5 @@
 import express from "express";
-import { and, eq, ilike } from "drizzle-orm";
+import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { products, categories } from "../db/schema.js";
 
@@ -12,18 +12,29 @@ router.get("/", async (req, res) => {
   const filters = [];
 
   if (search) {
-    filters.push(ilike(products.title, `%${search}%`));
+    filters.push(sql`
+      (
+        ${products.title} ILIKE ${"%" + search + "%"}
+        OR 
+        (set_limit(0.10) IS NOT NULL AND ${products.title} % ${search})
+      )
+    `);
   }
+
+  const relevance = search
+    ? sql<number>`similarity(${products.title}, ${search})`
+    : sql<number>`1`;
 
   const productList = await db
     .select({
-      id: products.id,
       title: products.title,
+      slug: products.slug,
       price: products.price,
       image: products.image,
     })
     .from(products)
-    .where(and(...filters));
+    .where(and(...filters))
+    .orderBy(() => (search ? desc(relevance) : products.id));
 
   res.json(productList);
 });
@@ -32,7 +43,12 @@ router.get("/", async (req, res) => {
 router.get("/:productSlug", async (req, res) => {
   const { productSlug } = req.params;
   const product = await db
-    .select()
+    .select({
+      title: products.title,
+      price: products.price,
+      description: products.description,
+      image: products.image,
+    })
     .from(products)
     .where(eq(products.slug, productSlug));
 

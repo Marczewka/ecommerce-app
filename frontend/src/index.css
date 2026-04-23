@@ -12,3 +12,7 @@
     @apply ring-2 outline-none;
   }
 }
+
+.btn.active {
+  @apply bg-slate-400;
+}
