@@ -1,7 +1,12 @@
 import app from "./app.js";
+import 'dotenv/config';
 
-const PORT = process.env.PORT || 5000;
+if (!process.env.PORT) {
+    throw new Error("No PORT found in .env");
+}
+
+const PORT = process.env.PORT;
 
 app.listen(PORT, () => {
-  console.log(`Listening on http://localhost:${PORT}`);
+    console.log(`Listening on http://localhost:${PORT}`);
 });
