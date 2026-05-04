@@ -1,13 +1,16 @@
-import type { SelectProducts } from "../../backend/src/db/schema.js";
+export interface ProductThumbnail {
+    title: string;
+    slug: string;
+    price: number;
+    image: string;
+}
 
-// GET /
-export type GetAllProductsResponse = Pick<
-  SelectProducts,
-  "title" | "slug" | "price" | "image"
->[];
+export interface ProductDetail {
+    title: string;
+    price: number;
+    description: string;
+    image: string;
+}
 
-// GET /:productSlug
-export type GetProductFromSlugResponse = Pick<
-  SelectProducts,
-  "title" | "price" | "description" | "image"
->;
+export type GetAllProductsResponse = ProductThumbnail[];
+export type GetProductFromSlugResponse = ProductDetail;

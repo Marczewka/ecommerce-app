@@ -76,9 +76,3 @@ export const cartItems = pgTable(
         check("unit_price_check", sql`${table.unitPrice} >= 0`),
     ],
 );
-
-export type InsertCategories = typeof categories.$inferInsert;
-export type SelectCategories = typeof categories.$inferSelect;
-
-export type InsertProducts = typeof products.$inferInsert;
-export type SelectProducts = typeof products.$inferSelect;

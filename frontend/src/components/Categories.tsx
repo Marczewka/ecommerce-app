@@ -16,21 +16,21 @@ export default function Categories(props: { closeMenu: () => void }) {
     <aside className="absolute top-10 left-1/2 w-48 -translate-x-1/2 border bg-slate-500 p-2">
       <ul>
         {categories.map((category) => (
-          <li key={category.slug} onClick={props.closeMenu}>
+          <li key={category.slug}>
             <NavLink
               to={`/categories/${category.slug}${location.search}`}
-              draggable="false"
               className="btn block capitalize"
+              onClick={props.closeMenu}
             >
               {category.name}
             </NavLink>
           </li>
         ))}
-        <li onClick={props.closeMenu}>
+        <li>
           <NavLink
             to={`/products${location.search}`}
-            draggable="false"
             className="btn block"
+            onClick={props.closeMenu}
           >
             All Products
           </NavLink>

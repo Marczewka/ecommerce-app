@@ -16,9 +16,9 @@ export default function Products() {
   }, [searchQuery]);
 
   return (
-    <main>
+    <div>
       <div className="flex flex-col">
-        <h1 className="mb-8 text-center text-4xl font-bold">Products</h1>
+        <h1>Products</h1>
         {searchQuery && (
           <p className="p-6 text-2xl text-gray-600">
             Search results for <span className="italic">"{searchQuery}"</span>
@@ -32,6 +32,6 @@ export default function Products() {
           </li>
         ))}
       </ul>
-    </main>
+    </div>
   );
 }

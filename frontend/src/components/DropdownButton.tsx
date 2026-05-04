@@ -18,14 +18,11 @@ export default function DropdownButton() {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, [isOpen]);
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="btn w-48 cursor-pointer justify-center rounded border"
-      >
+      <button onClick={() => setIsOpen(!isOpen)} className="btn-header">
         Categories {isOpen ? "▲" : "▼"}
       </button>
       <div className={isOpen ? "block" : "hidden"}>

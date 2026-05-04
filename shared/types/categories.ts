@@ -1,13 +1,21 @@
-import type {
-  SelectCategories,
-  SelectProducts,
-} from "../../backend/src/db/schema.js";
+export interface Category {
+    id: string;
+    name: string;
+    slug: string;
+}
+
+export interface Product {
+    title: string;
+    slug: string;
+    price: number;
+    image: string;
+}
 
 // GET /
-export type GetAllCategoriesResponse = SelectCategories[];
+export type GetAllCategoriesResponse = Category[];
 
 // GET /:categorySlug
 export type GetCategoryFromSlugResponse = {
-  categoryName: string;
-  products: Pick<SelectProducts, "title" | "slug" | "price" | "image">[];
+    categoryName: string;
+    products: Product[];
 };

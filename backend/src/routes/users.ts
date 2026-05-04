@@ -13,6 +13,7 @@ const router = express.Router();
 const UserRegisterSchema = z.object({
     username: z
         .string()
+        .trim()
         .min(3, "Username has to be at least 3 characters long")
         .max(20, "Username has to be at most 20 characters long"),
     password: z

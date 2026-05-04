@@ -44,13 +44,13 @@ export default function SearchBar() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search here..."
-          className="flex-4 rounded-l border p-2 focus:outline-none"
+          className="flex-4 rounded-l border bg-white p-2 text-black focus:outline-none"
         />
         {query && (
           <button
             type="button"
             onClick={handleClear}
-            className="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer px-2 text-xl hover:text-gray-400"
+            className="absolute top-1/2 right-1 -translate-y-1/2 cursor-pointer px-2 text-xl text-gray-400 hover:text-black"
           >
             ✕
           </button>

@@ -15,7 +15,7 @@ export default function Product() {
   }, [productSlug]);
 
   return (
-    <main className="overflow-hidden rounded-lg shadow-lg">
+    <div className="overflow-hidden rounded-lg shadow-lg">
       <div className="h-100 bg-gray-100 p-2">
         {product?.image && product.image.length > 0 && (
           <img
@@ -30,6 +30,6 @@ export default function Product() {
         <div className="p-4 text-4xl">${product?.price}</div>
         <div className="pt-8 text-gray-600">{product?.description}</div>
       </div>
-    </main>
+    </div>
   );
 }

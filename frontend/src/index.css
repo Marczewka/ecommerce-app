@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-.btn {
-  @apply flex p-2;
+.btn,
+.btn-header {
+  @apply flex bg-slate-500 p-2 text-gray-100;
   &:hover {
     @apply bg-slate-600;
   }
@@ -13,6 +14,29 @@
   }
 }
 
-.btn.active {
-  @apply bg-slate-400;
+.btn-header {
+  @apply w-48 justify-center cursor-pointer rounded border;
+  &:hover {
+    @apply bg-slate-600;
+  }
+  &:active {
+    @apply bg-slate-500;
+  }
+  &:focus {
+    @apply ring-2 outline-none;
+  }
+}
+
+.link {
+  @apply text-indigo-600 font-medium;
+  &:hover {
+    @apply text-indigo-500;
+  }
+  &:active {
+    @apply text-indigo-800;
+  }
+}
+
+h1 {
+  @apply mb-8 text-center text-4xl font-bold;
 }
