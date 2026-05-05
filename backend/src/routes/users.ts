@@ -107,7 +107,7 @@ router.delete("/:id", authenticateToken, isAdmin, async (req, res) => {
     if (deletedUser.length === 0) {
         return res.status(404).json({ message: "User not found" });
     }
-    return res.status(200).json(deletedUser[0]);
+    return res.json(deletedUser[0]);
 });
 
 export default router;

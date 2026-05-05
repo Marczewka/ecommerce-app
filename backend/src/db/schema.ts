@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
     check,
     decimal,
@@ -7,6 +7,7 @@ import {
     pgTable,
     text,
     timestamp,
+    uniqueIndex,
     varchar,
 } from "drizzle-orm/pg-core";
 
@@ -44,35 +45,63 @@ export const users = pgTable("users", {
     createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const carts = pgTable(
-    "carts",
-    {
-        id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-        userId: integer("user_id")
-            .references(() => users.id)
-            .notNull()
-            .unique(),
-        totalPrice: decimal("total_price", {
-            precision: 12,
-            scale: 2,
-        }).notNull(),
-        status: varchar("status", { length: 255 }).default("pending"),
-        shippingAddress: text("shipping_address").notNull(),
-    },
-    (table) => [check("total_price_check", sql`${table.totalPrice} >= 0`)],
-);
+export const carts = pgTable("carts", {
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+    userId: integer("user_id")
+        .references(() => users.id)
+        .notNull()
+        .unique(),
+});
 
 export const cartItems = pgTable(
     "cart_items",
     {
         id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
-        cartId: integer("cart_id").references(() => carts.id),
-        productId: integer("product_id").references(() => products.id),
-        itemQuantity: integer("item_quantity").notNull(),
-        unitPrice: decimal("unit_price", { precision: 12, scale: 2 }).notNull(),
+        cartId: integer("cart_id")
+            .notNull()
+            .references(() => carts.id),
+        productId: integer("product_id")
+            .notNull()
+            .references(() => products.id),
+        quantity: integer("item_quantity").notNull().default(1),
     },
     (table) => [
-        check("item_quantity_check", sql`${table.itemQuantity} >= 0`),
-        check("unit_price_check", sql`${table.unitPrice} >= 0`),
+        uniqueIndex("cart_product_unique").on(table.cartId, table.productId),
+        check("item_quantity_check", sql`${table.quantity} > 0`),
     ],
 );
+
+export const usersRelations = relations(users, ({ many }) => ({
+    carts: many(carts),
+}));
+
+export const cartsRelations = relations(carts, ({ one, many }) => ({
+    user: one(users, {
+        fields: [carts.userId],
+        references: [users.id],
+    }),
+    items: many(cartItems),
+}));
+
+export const cartItemsRelations = relations(cartItems, ({ one }) => ({
+    cart: one(carts, {
+        fields: [cartItems.cartId],
+        references: [carts.id],
+    }),
+    product: one(products, {
+        fields: [cartItems.productId],
+        references: [products.id],
+    }),
+}));
+
+export const productsRelations = relations(products, ({ one, many }) => ({
+    category: one(categories, {
+        fields: [products.categoryId],
+        references: [categories.id],
+    }),
+    cartItems: many(cartItems),
+}));
+
+export const categoriesRelations = relations(categories, ({ many }) => ({
+    products: many(products),
+}));
