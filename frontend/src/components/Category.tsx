@@ -34,7 +34,7 @@ export default function Category() {
           </p>
         )}
       </div>
-      <ul className="grid grid-cols-[repeat(auto-fit,min(200px))] justify-center justify-items-center gap-8">
+      <ul className="grid grid-cols-[repeat(auto-fit,min(240px))] justify-center justify-items-center gap-8">
         {products?.map((product) => (
           <li key={product.slug}>
             <ProductCard product={product} />

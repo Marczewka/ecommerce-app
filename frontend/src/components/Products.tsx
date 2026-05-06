@@ -6,7 +6,6 @@ import ProductCard from "./ProductCard";
 export default function Products() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<GetAllProductsResponse | null>(null);
-
   const searchQuery = searchParams.get("search") || "";
   const token = localStorage.getItem("token");
 
@@ -21,7 +20,7 @@ export default function Products() {
     )
       .then((res) => res.json())
       .then((data) => setProducts(data.products));
-  }, [searchQuery]);
+  }, [searchQuery, token]);
 
   return (
     <div>
@@ -33,7 +32,7 @@ export default function Products() {
           </p>
         )}
       </div>
-      <ul className="grid grid-cols-[repeat(auto-fit,min(200px))] justify-center justify-items-center gap-8">
+      <ul className="grid grid-cols-[repeat(auto-fit,min(240px))] justify-center justify-items-center gap-8">
         {products?.map((product) => (
           <li key={product.id}>
             <ProductCard product={product} />

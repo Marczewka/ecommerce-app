@@ -2,7 +2,7 @@ import express from "express";
 import { authenticateToken } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/admin.js";
 import { db } from "../db/index.js";
-import { carts, cartItems } from "../db/schema.js";
+import { carts, cartItems, products } from "../db/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
 
 const router = express.Router();
@@ -21,16 +21,21 @@ router.get("/my-cart", authenticateToken, async (req, res) => {
 
     const userId = req.user.id;
 
-    const userCart = await db.query.carts.findFirst({
-        where: eq(carts.userId, userId),
-        with: {
-            items: {
-                with: { product: true },
-            },
-        },
-    });
+    const itemsList = await db
+        .select({
+            id: products.id,
+            title: products.title,
+            slug: products.slug,
+            price: products.price,
+            image: products.image,
+            quantity: cartItems.quantity,
+        })
+        .from(cartItems)
+        .innerJoin(carts, eq(cartItems.cartId, carts.id))
+        .innerJoin(products, eq(cartItems.productId, products.id))
+        .where(eq(carts.userId, userId));
 
-    res.json(userCart);
+    res.json(itemsList);
 });
 
 // 2. POST /product/:id
@@ -57,6 +62,10 @@ router.post("/products/:id", authenticateToken, async (req, res) => {
         .values({
             cartId: cart.id,
             productId,
+            quantity: 1,
+        })
+        .onConflictDoNothing({
+            target: [cartItems.cartId, cartItems.productId],
         })
         .returning();
 

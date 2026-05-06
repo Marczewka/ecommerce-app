@@ -63,45 +63,10 @@ export const cartItems = pgTable(
         productId: integer("product_id")
             .notNull()
             .references(() => products.id),
-        quantity: integer("item_quantity").notNull().default(1),
+        quantity: integer("quantity").notNull().default(1),
     },
     (table) => [
         unique("cart_product_unique").on(table.cartId, table.productId),
-        check("item_quantity_check", sql`${table.quantity} > 0`),
+        check("quantity_check", sql`${table.quantity} > 0`),
     ],
 );
-
-export const usersRelations = relations(users, ({ many }) => ({
-    carts: many(carts),
-}));
-
-export const cartsRelations = relations(carts, ({ one, many }) => ({
-    user: one(users, {
-        fields: [carts.userId],
-        references: [users.id],
-    }),
-    items: many(cartItems),
-}));
-
-export const cartItemsRelations = relations(cartItems, ({ one }) => ({
-    cart: one(carts, {
-        fields: [cartItems.cartId],
-        references: [carts.id],
-    }),
-    product: one(products, {
-        fields: [cartItems.productId],
-        references: [products.id],
-    }),
-}));
-
-export const productsRelations = relations(products, ({ one, many }) => ({
-    category: one(categories, {
-        fields: [products.categoryId],
-        references: [categories.id],
-    }),
-    cartItems: many(cartItems),
-}));
-
-export const categoriesRelations = relations(categories, ({ many }) => ({
-    products: many(products),
-}));

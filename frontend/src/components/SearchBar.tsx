@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export default function SearchBar() {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
   const [searchParams] = useSearchParams();
 
   const handleSearch = (e: React.SubmitEvent) => {
@@ -18,9 +17,7 @@ export default function SearchBar() {
     }
 
     navigate({
-      pathname: location.pathname.startsWith("/products/")
-        ? "/products"
-        : location.pathname,
+      pathname: "/products",
       search: newParams.toString(),
     });
   };
@@ -31,7 +28,7 @@ export default function SearchBar() {
     newParams.delete("search");
 
     navigate({
-      pathname: location.pathname,
+      pathname: "/products",
       search: newParams.toString(),
     });
   };

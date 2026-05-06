@@ -21,12 +21,11 @@ router.get("/categories{/:categorySlug}", optionalAuth, async (req, res) => {
     }
 
     if (categorySlug) {
-        categoryData = await db
+        [categoryData] = await db
             .select({ id: categories.id, name: categories.name })
             .from(categories)
             .where(eq(categories.slug, categorySlug))
-            .limit(1)
-            .then((rows) => rows[0]);
+            .limit(1);
 
         if (!categoryData) {
             return res.status(404).json({ message: "Category not found" });
@@ -57,14 +56,23 @@ router.get("/categories{/:categorySlug}", optionalAuth, async (req, res) => {
             slug: products.slug,
             price: products.price,
             image: products.image,
-            quantityInCart: userId
-                ? cartItems.quantity
-                : sql<number>`0`.as("quantity_in_cart"),
+            quantity: (userId
+                ? sql<number>`COALESCE(${cartItems.quantity}, 0)`
+                : sql<number>`0`
+            ).as("quantity"),
         })
         .from(products);
 
     if (userId) {
-        query.leftJoin(cartItems, eq(cartItems.productId, products.id));
+        query
+            .leftJoin(carts, eq(carts.userId, userId))
+            .leftJoin(
+                cartItems,
+                and(
+                    eq(cartItems.productId, products.id),
+                    eq(cartItems.cartId, carts.id),
+                ),
+            );
     }
 
     const productList = await query

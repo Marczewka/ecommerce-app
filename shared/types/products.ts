@@ -4,7 +4,7 @@ export interface ProductThumbnail {
     slug: string;
     price: number;
     image: string;
-    quantityInCart: number;
+    quantity: number;
 }
 
 export interface ProductDetail {

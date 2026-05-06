@@ -1,16 +1,16 @@
 import { Link } from "react-router-dom";
 import type { GetAllProductsResponse } from "../../../shared/types/products";
 import { QuantityButton } from "./QuantityButton";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function ProductCard({
   product,
+  onRemove,
 }: {
   product: GetAllProductsResponse[number];
+  onRemove?: (productId: number) => void;
 }) {
-  const [quantity, setQuantity] = useState(product.quantityInCart);
-
-  useEffect(() => {}, [product.quantityInCart]);
+  const [quantity, setQuantity] = useState(product.quantity ?? 0);
 
   const token = localStorage.getItem("token");
 
@@ -66,9 +66,11 @@ export default function ProductCard({
               },
             },
           );
-          if (!response.ok) {
-            setQuantity(1);
+          if (response.ok) {
+            onRemove?.(product.id);
+            return;
           }
+          setQuantity(1);
         } else {
           const response = await fetch(
             `http://localhost:5000/api/carts/products/${product.id}`,
@@ -94,7 +96,7 @@ export default function ProductCard({
     <div className="relative">
       <Link
         to={`/products/${product.slug}`}
-        className="group flex w-48 flex-col overflow-hidden rounded-lg shadow-lg"
+        className="group flex w-60 flex-col overflow-hidden rounded-lg shadow-lg"
       >
         <div className="h-48 bg-gray-100 p-2">
           {product.image && product.image.length > 0 && (
@@ -110,8 +112,18 @@ export default function ProductCard({
           <div className="pt-4 text-2xl">${product.price}</div>
         </div>
       </Link>
-      <div className="absolute right-4 bottom-4">
-        {quantity}
+      <div className="absolute right-4 bottom-4 flex items-center">
+        {quantity > 0 && (
+          <QuantityButton
+            type={"minus"}
+            changeQuantity={() => handleQuantity("minus")}
+          ></QuantityButton>
+        )}
+        {quantity > 0 && (
+          <span className="text-md min-w-8 text-center font-bold">
+            {quantity}
+          </span>
+        )}
         <QuantityButton
           type={"plus"}
           changeQuantity={() => handleQuantity("plus")}
