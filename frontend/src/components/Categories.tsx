@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import type { GetAllCategoriesResponse } from "../../../shared/types/categories";
 
-export default function Categories(props: { closeMenu: () => void }) {
+export default function Categories({ closeMenu }: { closeMenu: () => void }) {
   const [categories, setCategories] = useState<GetAllCategoriesResponse>([]);
   const location = useLocation();
 
@@ -20,7 +20,7 @@ export default function Categories(props: { closeMenu: () => void }) {
             <NavLink
               to={`/categories/${category.slug}${location.search}`}
               className="btn block capitalize"
-              onClick={props.closeMenu}
+              onClick={closeMenu}
             >
               {category.name}
             </NavLink>
@@ -30,7 +30,7 @@ export default function Categories(props: { closeMenu: () => void }) {
           <NavLink
             to={`/products${location.search}`}
             className="btn block"
-            onClick={props.closeMenu}
+            onClick={closeMenu}
           >
             All Products
           </NavLink>

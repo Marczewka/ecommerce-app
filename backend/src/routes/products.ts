@@ -1,64 +1,80 @@
 import express from "express";
 import { and, desc, eq, exists, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
-import { products, cartItems, carts } from "../db/schema.js";
+import { products, cartItems, carts, categories } from "../db/schema.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/admin.js";
 import { optionalAuth } from "../middleware/optionalAuth.js";
 
 const router = express.Router();
 
-// GET /?search=searchQuery
-router.get("/", optionalAuth, async (req, res) => {
+// GET /categories{/:categorySlug}/?search=query
+router.get("/categories{/:categorySlug}", optionalAuth, async (req, res) => {
+    const categorySlug = req.params.categorySlug;
     const { search } = req.query;
+    const userId = req.user?.id;
+
+    let categoryData = null;
+
+    if (categorySlug && typeof categorySlug !== "string") {
+        return res.status(400).json({ message: "Invalid category slug" });
+    }
+
+    if (categorySlug) {
+        categoryData = await db
+            .select({ id: categories.id, name: categories.name })
+            .from(categories)
+            .where(eq(categories.slug, categorySlug))
+            .limit(1)
+            .then((rows) => rows[0]);
+
+        if (!categoryData) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+    }
 
     const filters = [];
+    if (categoryData) {
+        filters.push(eq(products.categoryId, categoryData.id));
+    }
 
     if (search) {
         filters.push(sql`
-            (
-                ${products.title} ILIKE ${"%" + search + "%"}
-                OR 
-                (set_limit(0.10) IS NOT NULL AND ${products.title} % ${search})
-            )
+            (${products.title} ILIKE ${"%" + search + "%"}
+            OR 
+            (set_limit(0.10) IS NOT NULL AND ${products.title} % ${search}))
         `);
-        const relevance = sql<number>`similarity(${products.title}, ${search})`;
     }
 
     const relevance = search
         ? sql<number>`similarity(${products.title}, ${search})`
         : sql<number>`1`;
 
-    const userId = req.user?.id;
-
-    if (userId) {
-        const productList = await db
-            .select({
-                title: products.title,
-                slug: products.slug,
-                price: products.price,
-                image: products.image,
-                quantityInCart: cartItems.quantity,
-            })
-            .from(products)
-            .leftJoin(cartItems, eq(cartItems.productId, products.id))
-            .where(and(...filters))
-            .orderBy(() => (search ? desc(relevance) : products.id));
-
-        return res.json(productList);
-    }
-    const productList = await db
+    const query = db
         .select({
+            id: products.id,
             title: products.title,
             slug: products.slug,
             price: products.price,
             image: products.image,
+            quantityInCart: userId
+                ? cartItems.quantity
+                : sql<number>`0`.as("quantity_in_cart"),
         })
-        .from(products)
+        .from(products);
+
+    if (userId) {
+        query.leftJoin(cartItems, eq(cartItems.productId, products.id));
+    }
+
+    const productList = await query
         .where(and(...filters))
         .orderBy(() => (search ? desc(relevance) : products.id));
 
-    res.json(productList);
+    res.json({
+        ...(categoryData && { categoryName: categoryData.name }),
+        products: productList,
+    });
 });
 
 // GET /:productSlug

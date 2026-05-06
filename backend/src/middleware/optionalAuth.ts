@@ -6,6 +6,7 @@ export const optionalAuth = (
     res: Response,
     next: NextFunction,
 ) => {
+    req.user = null;
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 

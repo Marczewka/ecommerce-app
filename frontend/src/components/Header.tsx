@@ -2,11 +2,21 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import DropdownButton from "./DropdownButton";
 import SearchBar from "./SearchBar";
 import { useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
     const token = localStorage.getItem("token");
-    return !!token;
+    if (!token) return false;
+
+    try {
+      const decoded = jwtDecode<{ exp: number }>(token);
+      const currentTime = Date.now() / 1000;
+
+      return decoded.exp > currentTime;
+    } catch {
+      return false;
+    }
   });
 
   const location = useLocation();

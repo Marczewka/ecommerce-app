@@ -8,11 +8,19 @@ export default function Products() {
   const [products, setProducts] = useState<GetAllProductsResponse | null>(null);
 
   const searchQuery = searchParams.get("search") || "";
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/products?search=${searchQuery}`)
+    fetch(
+      `http://localhost:5000/api/products/categories?search=${searchQuery}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    )
       .then((res) => res.json())
-      .then((data) => setProducts(data));
+      .then((data) => setProducts(data.products));
   }, [searchQuery]);
 
   return (
@@ -27,7 +35,7 @@ export default function Products() {
       </div>
       <ul className="grid grid-cols-[repeat(auto-fit,min(200px))] justify-center justify-items-center gap-8">
         {products?.map((product) => (
-          <li key={product.slug}>
+          <li key={product.id}>
             <ProductCard product={product} />
           </li>
         ))}

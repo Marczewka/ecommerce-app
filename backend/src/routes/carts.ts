@@ -3,7 +3,7 @@ import { authenticateToken } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/admin.js";
 import { db } from "../db/index.js";
 import { carts, cartItems } from "../db/schema.js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 
 const router = express.Router();
 
@@ -33,49 +33,23 @@ router.get("/my-cart", authenticateToken, async (req, res) => {
     res.json(userCart);
 });
 
-// 2. POST /add
-router.post("/add", authenticateToken, async (req, res) => {
+// 2. POST /product/:id
+router.post("/products/:id", authenticateToken, async (req, res) => {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthenticated" });
     }
 
-    const { productId } = req.body;
     const userId = req.user.id;
+    const productId = Number(req.params.id);
 
-    let [cart] = await db.select().from(carts).where(eq(carts.userId, userId));
-
-    if (!cart) {
-        [cart] = await db
-            .insert(carts)
-            .values({ userId })
-            .onConflictDoUpdate({
-                target: carts.userId,
-                set: { userId },
-            })
-            .returning();
-    }
+    const [cart] = await db
+        .select()
+        .from(carts)
+        .where(eq(carts.userId, userId))
+        .limit(1);
 
     if (!cart) {
         return res.status(404).json({ message: "Cart not found" });
-    }
-
-    const [existingItem] = await db
-        .select()
-        .from(cartItems)
-        .where(
-            and(
-                eq(cartItems.cartId, cart.id),
-                eq(cartItems.productId, productId),
-            ),
-        );
-
-    if (existingItem) {
-        const [updated] = await db
-            .update(cartItems)
-            .set({ quantity: existingItem.quantity + 1 })
-            .where(eq(cartItems.id, existingItem.id))
-            .returning();
-        return res.json(updated);
     }
 
     const [newItem] = await db
@@ -89,30 +63,64 @@ router.post("/add", authenticateToken, async (req, res) => {
     res.status(201).json(newItem);
 });
 
-// PATCH /item/:id
-router.patch("/item/:id", authenticateToken, async (req, res) => {
+// PATCH /product/:id
+router.put("/products/:id", authenticateToken, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthenticated" });
+    }
+
+    const userId = req.user.id;
     const { quantity } = req.body;
-    const itemId = Number(req.params.id);
+    const productId = Number(req.params.id);
 
     if (quantity < 1)
         return res
             .status(400)
             .json({ message: "Quantity has to be greater than 0" });
 
-    const updatedItem = await db
+    const [updatedItem] = await db
         .update(cartItems)
         .set({ quantity })
-        .where(eq(cartItems.id, itemId))
+        .where(
+            and(
+                eq(cartItems.productId, productId),
+                inArray(
+                    cartItems.cartId,
+                    db
+                        .select({ id: carts.id })
+                        .from(carts)
+                        .where(eq(carts.userId, userId)),
+                ),
+            ),
+        )
         .returning();
 
-    res.json(updatedItem[0]);
+    res.json(updatedItem);
 });
 
-// DELETE /item/:id
-router.delete("/item/:id", authenticateToken, async (req, res) => {
-    const itemId = Number(req.params.id);
+// DELETE /product/:id
+router.delete("/products/:id", authenticateToken, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Unauthenticated" });
+    }
 
-    await db.delete(cartItems).where(eq(cartItems.id, itemId));
+    const userId = req.user.id;
+    const productId = Number(req.params.id);
+
+    await db
+        .delete(cartItems)
+        .where(
+            and(
+                eq(cartItems.productId, productId),
+                inArray(
+                    cartItems.cartId,
+                    db
+                        .select({ id: carts.id })
+                        .from(carts)
+                        .where(eq(carts.userId, userId)),
+                ),
+            ),
+        );
     res.json({ message: "Item deleted from the cart" });
 });
 

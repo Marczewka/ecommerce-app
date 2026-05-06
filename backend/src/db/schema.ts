@@ -7,7 +7,7 @@ import {
     pgTable,
     text,
     timestamp,
-    uniqueIndex,
+    unique,
     varchar,
 } from "drizzle-orm/pg-core";
 
@@ -66,7 +66,7 @@ export const cartItems = pgTable(
         quantity: integer("item_quantity").notNull().default(1),
     },
     (table) => [
-        uniqueIndex("cart_product_unique").on(table.cartId, table.productId),
+        unique("cart_product_unique").on(table.cartId, table.productId),
         check("item_quantity_check", sql`${table.quantity} > 0`),
     ],
 );

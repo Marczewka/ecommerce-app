@@ -1,6 +1,6 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { users } from "../db/schema.js";
+import { users, carts } from "../db/schema.js";
 import { db } from "../db/index.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
@@ -40,20 +40,49 @@ router.get("/", authenticateToken, isAdmin, async (req, res) => {
 
 // POST /register
 router.post("/register", async (req, res) => {
-    const result = await UserRegisterSchema.safeParseAsync(req.body);
+    try {
+        const result = await UserRegisterSchema.safeParseAsync(req.body);
 
-    if (!result.success) {
-        return res.status(400).json(z.treeifyError(result.error));
+        if (!result.success) {
+            return res.status(400).json(z.treeifyError(result.error));
+        }
+
+        const { username, password } = result.data;
+
+        const [existingUser] = await db
+            .select()
+            .from(users)
+            .where(eq(users.username, username))
+            .limit(1);
+
+        if (existingUser) {
+            return res.status(400).json({ message: "Username already taken" });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const [newUser] = await db
+            .insert(users)
+            .values({
+                username,
+                passwordHash: hashedPassword,
+            })
+            .returning({ insertedId: users.id });
+
+        if (newUser) {
+            await db.insert(carts).values({
+                userId: newUser.insertedId,
+            });
+        }
+
+        res.status(201).json(username);
+    } catch (error: any) {
+        console.error("BŁĄD PODCZAS REJESTRACJI:", error);
+        res.status(500).json({
+            error: "Internal server error",
+            details: error.message,
+        });
     }
-
-    const { username, password } = result.data;
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await db.insert(users).values({
-        username,
-        passwordHash: hashedPassword,
-    });
-    res.status(201).json(username);
 });
 
 // POST /login
@@ -85,7 +114,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-        { userId: user.id, username: user.username },
+        { id: user.id, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: "1h" },
     );
