@@ -40,49 +40,66 @@ router.get("/", authenticateToken, isAdmin, async (req, res) => {
 
 // POST /register
 router.post("/register", async (req, res) => {
-    try {
-        const result = await UserRegisterSchema.safeParseAsync(req.body);
+    const result = await UserRegisterSchema.safeParseAsync(req.body);
 
-        if (!result.success) {
-            return res.status(400).json(z.treeifyError(result.error));
-        }
+    if (!result.success) {
+        return res.status(400).json(z.treeifyError(result.error));
+    }
 
-        const { username, password } = result.data;
+    const { username, password } = result.data;
 
-        const [existingUser] = await db
-            .select()
-            .from(users)
-            .where(eq(users.username, username))
-            .limit(1);
+    const [existingUser] = await db
+        .select()
+        .from(users)
+        .where(eq(users.username, username));
 
-        if (existingUser) {
-            return res.status(400).json({ message: "Username already taken" });
-        }
+    if (existingUser) {
+        return res.status(400).json({ message: "Username already taken" });
+    }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-        const [newUser] = await db
-            .insert(users)
-            .values({
-                username,
-                passwordHash: hashedPassword,
-            })
-            .returning({ insertedId: users.id });
+    const [newUser] = await db
+        .insert(users)
+        .values({
+            username,
+            passwordHash: hashedPassword,
+        })
+        .returning({
+            id: users.id,
+            username: users.username,
+            role: users.role,
+        });
 
-        if (newUser) {
-            await db.insert(carts).values({
-                userId: newUser.insertedId,
-            });
-        }
-
-        res.status(201).json(username);
-    } catch (error: any) {
-        console.error("BŁĄD PODCZAS REJESTRACJI:", error);
-        res.status(500).json({
-            error: "Internal server error",
-            details: error.message,
+    if (newUser) {
+        await db.insert(carts).values({
+            userId: newUser.id,
         });
     }
+
+    if (!newUser) {
+        return res.status(400).json({ message: "User not created" });
+    }
+
+    if (!process.env.JWT_SECRET) {
+        return res.status(500).json({ message: "JWT_SECRET is not defined" });
+    }
+
+    const token = jwt.sign(
+        { id: newUser.id, username: newUser.username, role: newUser.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" },
+    );
+
+    res.json({
+        message: "Registration successful",
+        user: {
+            id: newUser.id,
+            username: newUser.username,
+            role: newUser.role,
+        },
+        token: token,
+    });
 });
 
 // POST /login
@@ -92,8 +109,7 @@ router.post("/login", async (req, res) => {
     const [user] = await db
         .select()
         .from(users)
-        .where(eq(users.username, username))
-        .limit(1);
+        .where(eq(users.username, username));
 
     if (!user) {
         return res
@@ -114,13 +130,18 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-        { id: user.id, role: user.role },
+        { id: user.id, username: user.username, role: user.role },
         process.env.JWT_SECRET,
         { expiresIn: "1h" },
     );
 
     res.json({
         message: "Login successful",
+        user: {
+            id: user.id,
+            username: user.username,
+            role: user.role,
+        },
         token: token,
     });
 });

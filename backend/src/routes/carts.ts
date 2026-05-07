@@ -50,8 +50,7 @@ router.post("/products/:id", authenticateToken, async (req, res) => {
     const [cart] = await db
         .select()
         .from(carts)
-        .where(eq(carts.userId, userId))
-        .limit(1);
+        .where(eq(carts.userId, userId));
 
     if (!cart) {
         return res.status(404).json({ message: "Cart not found" });

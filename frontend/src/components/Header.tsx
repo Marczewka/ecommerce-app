@@ -1,30 +1,20 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import DropdownButton from "./DropdownButton";
 import SearchBar from "./SearchBar";
-import { useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { useDispatch } from "react-redux";
+import { logout } from "../features/authSlice";
+import { useAppSelector } from "../app/store";
+import { setCart } from "../features/cartSlice";
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return false;
-
-    try {
-      const decoded = jwtDecode<{ exp: number }>(token);
-      const currentTime = Date.now() / 1000;
-
-      return decoded.exp > currentTime;
-    } catch {
-      return false;
-    }
-  });
-
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const auth = useAppSelector((state) => state.auth);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
+    dispatch(logout());
+    dispatch(setCart([]));
     navigate("/");
   };
 
@@ -33,7 +23,7 @@ export default function Header() {
   return (
     <nav className="sticky top-0 z-10 flex h-15 items-center bg-slate-500 text-gray-100">
       <div className="flex h-5/6 flex-1 items-center justify-evenly">
-        <Link to="/" className="btn-header">
+        <Link to="/" className="btn-light w-48">
           Home
         </Link>
         {!isAuthPage && <DropdownButton />}
@@ -42,18 +32,18 @@ export default function Header() {
         {!isAuthPage && <SearchBar />}
       </div>
       <div className="flex h-5/6 flex-1 items-center justify-evenly">
-        {isLoggedIn && (
-          <Link to="/cart" className="btn-header">
+        {!isAuthPage && auth.isAuthenticated && (
+          <Link to="/cart" className="btn-light w-48">
             Cart
           </Link>
         )}
         {!isAuthPage &&
-          (isLoggedIn ? (
-            <button onClick={handleLogout} className="btn-header">
+          (auth.isAuthenticated ? (
+            <button onClick={handleLogout} className="btn-light w-48">
               Logout
             </button>
           ) : (
-            <Link to="/login" className="btn-header">
+            <Link to="/login" className="btn-light w-48">
               Login
             </Link>
           ))}

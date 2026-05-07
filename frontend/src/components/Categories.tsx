@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import type { GetAllCategoriesResponse } from "../../../shared/types/categories";
+import type { GetAllCategoriesResponse } from "../../../shared/types/api";
+import api from "../api/axios";
 
 export default function Categories({ closeMenu }: { closeMenu: () => void }) {
   const [categories, setCategories] = useState<GetAllCategoriesResponse>([]);
   const location = useLocation();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data));
+    const getCategories = async () => {
+      try {
+        const response = await api.get("/categories");
+        setCategories(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getCategories();
   }, []);
 
   return (

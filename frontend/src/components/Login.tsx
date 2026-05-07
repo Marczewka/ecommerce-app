@@ -1,11 +1,17 @@
 import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
+import { setCredentials } from "../features/authSlice";
+import api from "../api/axios";
+import axios from "axios";
+import { setCart } from "../features/cartSlice";
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
@@ -21,30 +27,33 @@ export default function Login() {
     }
 
     setIsLoading(true);
+
     try {
-      const response = await fetch("http://localhost:5000/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("token", data.token);
-        window.location.href = "/";
+      const loginRes = await api.post("/users/login", { username, password });
+      dispatch(
+        setCredentials({
+          user: loginRes.data.user,
+          token: loginRes.data.token,
+        }),
+      );
+      const cartRes = await api.get("/carts/my-cart");
+      dispatch(setCart(cartRes.data));
+      window.location.href = "/";
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const message = error.response?.data.message;
+        setErrors({ form: message });
       } else {
-        setErrors({ form: data.message });
+        setErrors({ form: "Connection refused" });
+        console.error(error);
       }
-    } catch {
-      setErrors({ form: "Connection refused. Is the server running?" });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[80vh]">
+    <div className="flex min-h-[80vh] items-center justify-center">
       <form
         onSubmit={handleSubmit}
         noValidate
@@ -53,7 +62,7 @@ export default function Login() {
         <h1>Sign in</h1>
 
         {errors.form && (
-          <p className="w-full rounded bg-red-50 p-2 text-sm text-red-600 border border-red-200 text-center">
+          <p className="w-full rounded border border-red-200 bg-red-50 p-2 text-center text-sm text-red-600">
             {errors.form}
           </p>
         )}
@@ -70,14 +79,14 @@ export default function Login() {
                 setErrors((prev) => ({ ...prev, username: "" }));
             }}
             placeholder="username"
-            className={`w-full rounded border p-2 transition-all focus:outline-none focus:ring-1 ${
+            className={`w-full rounded border p-2 transition-all focus:ring-1 focus:outline-none ${
               errors.username
                 ? "border-red-500 ring-1 ring-red-500"
-                : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
             }`}
           />
           {errors.username && (
-            <span className="text-[10px] text-red-500 ml-1">
+            <span className="ml-1 text-[10px] text-red-500">
               {errors.username}
             </span>
           )}
@@ -95,20 +104,24 @@ export default function Login() {
                 setErrors((prev) => ({ ...prev, password: "" }));
             }}
             placeholder="password"
-            className={`w-full rounded border p-2 transition-all focus:outline-none focus:ring-1 ${
+            className={`w-full rounded border p-2 transition-all focus:ring-1 focus:outline-none ${
               errors.password
                 ? "border-red-500 ring-1 ring-red-500"
-                : "border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                : "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
             }`}
           />
           {errors.password && (
-            <span className="text-[10px] text-red-500 ml-1">
+            <span className="ml-1 text-[10px] text-red-500">
               {errors.password}
             </span>
           )}
         </div>
 
-        <button type="submit" className="btn-header mt-8" disabled={isLoading}>
+        <button
+          type="submit"
+          className="btn-dark mt-8 w-48"
+          disabled={isLoading}
+        >
           {isLoading ? "Signing in..." : "Sign in"}
         </button>
 

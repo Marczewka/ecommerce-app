@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import type { Request, Response, NextFunction } from "express";
+import authRouter from "./routes/auth.js";
 import productsRouter from "./routes/products.js";
 import categoriesRouter from "./routes/categories.js";
 import usersRouter from "./routes/users.js";
@@ -21,13 +22,14 @@ app.use(
 
 app.use(express.json());
 
+app.use("/api/auth", authRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/categories", categoriesRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/carts", cartsRouter);
 
-app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
-    console.error(err);
+app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
+    console.error(error);
     res.status(500).json({ message: "Internal server error" });
 });
 

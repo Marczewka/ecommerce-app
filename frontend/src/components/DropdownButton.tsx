@@ -22,7 +22,7 @@ export default function DropdownButton() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      <button onClick={() => setIsOpen(!isOpen)} className="btn-header">
+      <button onClick={() => setIsOpen(!isOpen)} className="btn-light w-48">
         Categories {isOpen ? "▲" : "▼"}
       </button>
       <div className={isOpen ? "block" : "hidden"}>

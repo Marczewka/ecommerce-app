@@ -24,8 +24,7 @@ router.get("/categories{/:categorySlug}", optionalAuth, async (req, res) => {
         [categoryData] = await db
             .select({ id: categories.id, name: categories.name })
             .from(categories)
-            .where(eq(categories.slug, categorySlug))
-            .limit(1);
+            .where(eq(categories.slug, categorySlug));
 
         if (!categoryData) {
             return res.status(404).json({ message: "Category not found" });
@@ -86,17 +85,42 @@ router.get("/categories{/:categorySlug}", optionalAuth, async (req, res) => {
 });
 
 // GET /:productSlug
-router.get("/:productSlug", async (req, res) => {
+router.get("/:productSlug", optionalAuth, async (req, res) => {
     const { productSlug } = req.params;
-    const [product] = await db
+    const userId = req.user?.id;
+
+    if (typeof productSlug !== "string") {
+        return res.status(400).json({ message: "Invalid product slug" });
+    }
+
+    const query = db
         .select({
+            id: products.id,
             title: products.title,
             price: products.price,
             description: products.description,
             image: products.image,
+            quantity: (userId
+                ? sql<number>`COALESCE(${cartItems.quantity}, 0)`
+                : sql<number>`0`
+            ).as("quantity"),
         })
         .from(products)
         .where(eq(products.slug, productSlug));
+
+    if (userId) {
+        query
+            .leftJoin(carts, eq(carts.userId, userId))
+            .leftJoin(
+                cartItems,
+                and(
+                    eq(cartItems.productId, products.id),
+                    eq(cartItems.cartId, carts.id),
+                ),
+            );
+    }
+
+    const [product] = await query;
 
     if (!product) return res.status(404).json({ message: "Product not found" });
     res.json(product);

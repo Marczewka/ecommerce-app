@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import type { GetAllProductsResponse } from "../../../shared/types/products";
+import type { GetAllProductsResponse } from "../../../shared/types/api";
 import ProductCard from "./ProductCard";
+import api from "../api/axios";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
@@ -10,16 +11,18 @@ export default function Products() {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    fetch(
-      `http://localhost:5000/api/products/categories?search=${searchQuery}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    )
-      .then((res) => res.json())
-      .then((data) => setProducts(data.products));
+    const getCategoryProducts = async () => {
+      try {
+        const { data } = await api.get(
+          `products/categories/?search=${searchQuery}`,
+        );
+        setProducts(data.products);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getCategoryProducts();
   }, [searchQuery, token]);
 
   return (

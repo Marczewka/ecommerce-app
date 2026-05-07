@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import ProductCard from "./ProductCard";
-import type { GetAllProductsResponse } from "../../../shared/types/products";
+import type { GetAllProductsResponse } from "../../../shared/types/api";
+import api from "../api/axios";
 
 export default function Category() {
   const { categorySlug } = useParams();
@@ -12,14 +13,19 @@ export default function Category() {
   const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
-    fetch(
-      `http://localhost:5000/api/products/categories/${categorySlug}?search=${searchQuery}`,
-    )
-      .then((res) => res.json())
-      .then((data) => {
+    const getCategoryProducts = async () => {
+      try {
+        const { data } = await api.get(
+          `products/categories/${categorySlug}?search=${searchQuery}`,
+        );
         setProducts(data.products);
         setCategoryName(data.categoryName);
-      });
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    getCategoryProducts();
   }, [categorySlug, searchQuery]);
 
   return (

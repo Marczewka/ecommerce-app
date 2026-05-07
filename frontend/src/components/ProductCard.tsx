@@ -1,97 +1,53 @@
 import { Link } from "react-router-dom";
-import type { GetAllProductsResponse } from "../../../shared/types/products";
+import type { GetAllProductsResponse } from "../../../shared/types/api";
 import { QuantityButton } from "./QuantityButton";
-import { useState } from "react";
+import { useAppSelector } from "../app/store";
+import api from "../api/axios";
+import { useDispatch } from "react-redux";
+import { addItem, removeItem, updateQuantity } from "../features/cartSlice";
 
 export default function ProductCard({
   product,
-  onRemove,
 }: {
   product: GetAllProductsResponse[number];
-  onRemove?: (productId: number) => void;
 }) {
-  const [quantity, setQuantity] = useState(product.quantity ?? 0);
+  const dispatch = useDispatch();
+  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
+  const quantity = useAppSelector((state) => {
+    const itemInCart = state.cart.find((item) => item.id === product?.id);
+    return itemInCart ? itemInCart.quantity : 0;
+  });
 
-  const token = localStorage.getItem("token");
+  const handleQuantity = async (type: "plus" | "minus") => {
+    if (!product) return;
 
-  const handleQuantity = async (type: string) => {
+    const endpoint = `/carts/products/${product.id}`;
+
     try {
       if (type === "plus") {
-        const newQuantity = quantity + 1;
-        setQuantity(newQuantity);
-
         if (quantity === 0) {
-          const response = await fetch(
-            `http://localhost:5000/api/carts/products/${product.id}`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            },
-          );
-          if (!response.ok) {
-            setQuantity(0);
-          }
+          await api.post(endpoint);
+          dispatch(addItem(product));
         } else {
-          const response = await fetch(
-            `http://localhost:5000/api/carts/products/${product.id}`,
-            {
-              method: "PUT",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ quantity: newQuantity }),
-            },
-          );
-          if (!response.ok) {
-            setQuantity(quantity);
-          }
+          const newQuantity = quantity + 1;
+          await api.put(endpoint, { quantity: newQuantity });
+          dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
-      }
-
-      if (type === "minus") {
-        const newQuantity = quantity - 1;
-        setQuantity(newQuantity);
+      } else if (type === "minus") {
         if (quantity === 1) {
-          const response = await fetch(
-            `http://localhost:5000/api/carts/products/${product.id}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-            },
-          );
-          if (response.ok) {
-            onRemove?.(product.id);
-            return;
-          }
-          setQuantity(1);
+          await api.delete(endpoint);
+          dispatch(removeItem(product.id));
         } else {
-          const response = await fetch(
-            `http://localhost:5000/api/carts/products/${product.id}`,
-            {
-              method: "PUT",
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ quantity: newQuantity }),
-            },
-          );
-          if (!response.ok) {
-            setQuantity(quantity);
-          }
+          const newQuantity = quantity - 1;
+          await api.put(endpoint, { quantity: newQuantity });
+          dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       }
     } catch (error) {
       console.error(error);
     }
   };
+
   return (
     <div className="relative">
       <Link
@@ -124,10 +80,12 @@ export default function ProductCard({
             {quantity}
           </span>
         )}
-        <QuantityButton
-          type={"plus"}
-          changeQuantity={() => handleQuantity("plus")}
-        ></QuantityButton>
+        {isAuthenticated && (
+          <QuantityButton
+            type={"plus"}
+            changeQuantity={() => handleQuantity("plus")}
+          ></QuantityButton>
+        )}
       </div>
     </div>
   );

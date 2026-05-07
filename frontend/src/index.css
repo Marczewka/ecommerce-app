@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
-.btn,
-.btn-header {
-  @apply flex bg-slate-500 p-2 text-gray-100;
+.btn-search,
+.btn-dark,
+.btn-light {
+  @apply flex justify-center border;
+  &:focus {
+    @apply ring-2 outline-none;
+  }
+}
+
+.btn-light,
+.btn-search {
+  @apply cursor-pointer bg-slate-500 p-2 text-gray-100 shadow shadow-white;
   &:hover {
     @apply bg-slate-600;
   }
@@ -14,8 +23,8 @@
   }
 }
 
-.btn-header {
-  @apply w-48 justify-center cursor-pointer rounded border;
+.btn-dark {
+  @apply cursor-pointer rounded border-slate-500 bg-slate-500 p-2 text-gray-100 shadow shadow-slate-700;
   &:hover {
     @apply bg-slate-600;
   }
@@ -25,10 +34,18 @@
   &:focus {
     @apply ring-2 outline-none;
   }
+}
+
+.btn-light {
+  @apply rounded;
+}
+
+.btn-search {
+  @apply rounded-r-sm;
 }
 
 .link {
-  @apply text-indigo-600 font-medium;
+  @apply font-medium text-indigo-600;
   &:hover {
     @apply text-indigo-500;
   }

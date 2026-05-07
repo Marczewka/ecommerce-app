@@ -1,11 +1,9 @@
-import type { Request, Response, NextFunction } from "express";
+import express from "express";
 import jwt from "jsonwebtoken";
 
-export const authenticateToken = (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-) => {
+const router = express.Router();
+
+router.get("/me", (req, res) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
@@ -19,20 +17,16 @@ export const authenticateToken = (
 
     try {
         const secret = process.env.JWT_SECRET;
-        const decoded = jwt.verify(token, secret) as {
+        const userData = jwt.verify(token, secret) as {
             id: number;
             username: string;
             role: string;
         };
 
-        req.user = {
-            id: decoded.id,
-            username: decoded.username,
-            role: decoded.role,
-        };
-
-        next();
+        return res.status(200).json(userData);
     } catch {
-        return res.status(401).json({ message: "Invalid or expired token" });
+        res.status(401).json({ message: "Invalid or expired token" });
     }
-};
+});
+
+export default router;

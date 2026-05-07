@@ -17,16 +17,18 @@ export const optionalAuth = (
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
             id: number;
+            username: string;
             role: string;
         };
 
         req.user = {
             id: decoded.id,
+            username: decoded.username,
             role: decoded.role,
         };
 
         next();
-    } catch (error) {
+    } catch {
         next();
     }
 };

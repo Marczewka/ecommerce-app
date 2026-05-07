@@ -54,10 +54,7 @@ export default function SearchBar() {
         )}
       </div>
 
-      <button
-        type="submit"
-        className="btn flex-1 cursor-pointer justify-center rounded-r border"
-      >
+      <button type="submit" className="btn-search flex-1">
         Search
       </button>
     </form>
