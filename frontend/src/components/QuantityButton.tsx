@@ -8,7 +8,7 @@ export function QuantityButton({
   return (
     <button
       onClick={() => changeQuantity(type)}
-      className="btn-dark flex h-8 w-8 cursor-pointer items-center justify-center rounded-3xl"
+      className="btn-dark flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-3xl"
     >
       <span className="-translate-y-0.5 text-2xl font-bold">
         {type === "plus" ? "+" : "-"}

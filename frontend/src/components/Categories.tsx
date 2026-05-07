@@ -21,13 +21,13 @@ export default function Categories({ closeMenu }: { closeMenu: () => void }) {
   }, []);
 
   return (
-    <aside className="absolute top-10 left-1/2 w-48 -translate-x-1/2 border bg-slate-500 p-2">
-      <ul>
+    <aside className="absolute top-1/2 left-1/2 -z-10 w-48 -translate-x-1/2 rounded-xl border-2 border-slate-600 bg-slate-500 p-2">
+      <ul className="mt-4">
         {categories.map((category) => (
           <li key={category.slug}>
             <NavLink
               to={`/categories/${category.slug}${location.search}`}
-              className="btn block capitalize"
+              className="btn-list border-b"
               onClick={closeMenu}
             >
               {category.name}
@@ -37,7 +37,7 @@ export default function Categories({ closeMenu }: { closeMenu: () => void }) {
         <li>
           <NavLink
             to={`/products${location.search}`}
-            className="btn block"
+            className="btn-list"
             onClick={closeMenu}
           >
             All Products

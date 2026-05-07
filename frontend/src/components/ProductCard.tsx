@@ -52,9 +52,9 @@ export default function ProductCard({
     <div className="relative">
       <Link
         to={`/products/${product.slug}`}
-        className="group flex w-60 flex-col overflow-hidden rounded-lg shadow-lg"
+        className="group flex w-60 flex-col overflow-hidden rounded-lg shadow-lg transition focus:outline-slate-400"
       >
-        <div className="h-48 bg-gray-100 p-2">
+        <div className="h-48 bg-white/40 p-2">
           {product.image && product.image.length > 0 && (
             <img
               src={product.image}
@@ -63,7 +63,7 @@ export default function ProductCard({
             />
           )}
         </div>
-        <div className="bg-white p-3 transition-colors group-hover:bg-gray-200">
+        <div className="bg-slate-50 p-3 transition-colors group-hover:bg-gray-100">
           <div className="line-clamp-2 h-14 text-lg">{product.title}</div>
           <div className="pt-4 text-2xl">${product.price}</div>
         </div>

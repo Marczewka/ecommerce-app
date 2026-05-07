@@ -76,7 +76,7 @@ export default function Product() {
       </div>
       <div className="bg-white p-20">
         <div className="p-4 text-5xl">{product?.title}</div>
-        <div className="p-4 text-4xl">${product?.price}</div>
+        {product?.price && <div className="p-4 text-4xl">${product.price}</div>}
         <div className="pt-8 text-gray-600">{product?.description}</div>
       </div>
       <div className="absolute top-135 right-100 flex items-center">
