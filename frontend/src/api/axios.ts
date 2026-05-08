@@ -2,8 +2,12 @@ import axios from "axios";
 import { store } from "../app/store";
 import { logout } from "../features/authSlice";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+const API_URL = `${BASE_URL}/api`;
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: API_URL,
 });
 
 api.interceptors.request.use((config) => {
