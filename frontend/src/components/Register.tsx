@@ -33,7 +33,7 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      const { data } = await api.post("user/register", { username, password });
+      const { data } = await api.post("users/register", { username, password });
       dispatch(setCredentials({ user: data.user, token: data.token }));
       dispatch(setCart([]));
       window.location.href = "/";
