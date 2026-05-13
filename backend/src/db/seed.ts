@@ -13,7 +13,7 @@ async function seed() {
             "https://fakestoreapi.com/products",
         );
 
-        const productsData: any[] = await productsResponse.json();
+        const productsData = (await productsResponse.json()) as any[];
 
         console.log("Clearing existing data...");
         await db.execute(
