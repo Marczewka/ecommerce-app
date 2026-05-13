@@ -1,17 +1,3 @@
-import type {
-    Category,
-    Product,
-    User,
-    Cart,
-    CartItem,
-} from "../backend/src/db/schema.js";
-import type {
-    NewCategory,
-    NewProduct,
-    NewUser,
-    NewCart,
-    NewCartItem,
-} from "../backend/src/db/schema.js";
 import { z } from "zod";
 
 export const UserRegisterSchema = z.object({
@@ -43,6 +29,14 @@ export interface ValidationErrorRes {
 }
 
 // USER
+type User = {
+    id: number;
+    username: string;
+    passwordHash: string;
+    role: string;
+    createdAt: Date;
+};
+
 export type UserRole = "admin" | "user";
 
 export type UserRes = Pick<User, "id" | "username"> & {
@@ -61,6 +55,28 @@ export interface AuthRes {
 }
 
 // PRODUCT
+type Product = {
+    id: number;
+    createdAt: Date;
+    title: string;
+    slug: string;
+    price: string;
+    description: string | null;
+    categoryId: number;
+    image: string | null;
+};
+
+type NewProduct = {
+    title: string;
+    slug: string;
+    price: string;
+    categoryId: number;
+    id?: number | undefined;
+    createdAt?: Date | undefined;
+    image?: string | null | undefined;
+    description?: string | null | undefined;
+};
+
 export type ProductRes = Pick<
     Product,
     "id" | "title" | "slug" | "price" | "image"
@@ -87,6 +103,20 @@ export type ProductAdminReq = Omit<
 export type ProductAdminRes = Product;
 
 // CATEGORY
+type Category = {
+    id: number;
+    createdAt: Date;
+    slug: string;
+    name: string;
+};
+
+type NewCategory = {
+    slug: string;
+    name: string;
+    id?: number | undefined;
+    createdAt?: Date | undefined;
+};
+
 export type CategoryRes = Pick<Category, "id" | "name" | "slug">;
 
 export type CategoryAdminRes = Category;
@@ -97,6 +127,14 @@ export type CategoryAdminReq = Omit<
 >;
 
 // CART
+type CartItem = {
+    id: number;
+    updatedAt: Date;
+    cartId: number;
+    productId: number;
+    quantity: number;
+};
+
 export type CartItemRes = Pick<CartItem, "id" | "productId" | "quantity">;
 
 export interface CartAdminRes {
