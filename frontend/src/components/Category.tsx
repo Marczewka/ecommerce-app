@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import ProductCard from "./ProductCard";
-import type { GetAllProductsResponse } from "../../../shared/types/api";
+import type { ProductListRes } from "@shared/dtos";
 import api from "../api/axios";
 
 export default function Category() {
   const { categorySlug } = useParams();
   const [searchParams] = useSearchParams();
-  const [products, setProducts] = useState<GetAllProductsResponse | null>(null);
-  const [categoryName, setCategoryName] = useState<string | null>(null);
+  const [products, setProducts] = useState<ProductListRes["products"] | null>(
+    null,
+  );
+  const [categoryName, setCategoryName] =
+    useState<ProductListRes["categoryName"]>();
 
   const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
     const getCategoryProducts = async () => {
       try {
-        const { data } = await api.get(
+        const { data } = await api.get<ProductListRes>(
           `products/categories/${categorySlug}?search=${searchQuery}`,
         );
         setProducts(data.products);

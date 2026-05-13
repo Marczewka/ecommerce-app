@@ -11,6 +11,7 @@ export default function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const auth = useAppSelector((state) => state.auth);
+  const cart = useAppSelector((state) => state.cart);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -21,22 +22,35 @@ export default function Header() {
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/register";
   return (
-    <nav className="sticky top-0 z-10 flex h-15 items-center bg-slate-500 text-gray-100">
-      <div className="flex h-5/6 flex-1 items-center justify-evenly">
+    <nav className="sticky top-0 z-10 grid h-15 grid-cols-6 items-center bg-slate-500 text-gray-100">
+      <div className="col-start-1 flex justify-center">
         <Link to="/" className="btn-light w-48">
           Home
         </Link>
+      </div>
+
+      <div className="col-start-2 flex justify-center">
         {!isAuthPage && <DropdownButton />}
       </div>
-      <div className="flex h-5/6 flex-1 items-center">
+
+      <div className="col-span-2 col-start-3 flex justify-center">
         {!isAuthPage && <SearchBar />}
       </div>
-      <div className="flex h-5/6 flex-1 items-center justify-evenly">
+
+      <div className="col-start-5 flex justify-center">
         {!isAuthPage && auth.isAuthenticated && (
-          <Link to="/cart" className="btn-light w-48">
+          <Link to="/cart" className="btn-light relative w-48">
             Cart
+            {cart.length > 0 && (
+              <span className="absolute -right-2 -bottom-1 flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-sm font-bold text-slate-500 shadow-lg">
+                {cart.reduce((total, item) => total + item.quantity, 0)}
+              </span>
+            )}
           </Link>
         )}
+      </div>
+
+      <div className="col-start-6 flex justify-center">
         {!isAuthPage &&
           (auth.isAuthenticated ? (
             <button onClick={handleLogout} className="btn-light w-48">

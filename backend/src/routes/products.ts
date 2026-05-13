@@ -1,165 +1,216 @@
 import express from "express";
-import { and, desc, eq, exists, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "../db/index.js";
 import { products, cartItems, carts, categories } from "../db/schema.js";
 import { authenticateToken } from "../middleware/auth.js";
 import { isAdmin } from "../middleware/admin.js";
 import { optionalAuth } from "../middleware/optionalAuth.js";
+import type { Request, Response } from "express";
+import type {
+    ErrorRes,
+    ProductDetailsRes,
+    ProductListRes,
+    ProductAdminReq,
+    ProductRes,
+    ProductAdminRes,
+} from "../../../shared/dtos.js";
 
 const router = express.Router();
 
 // GET /categories{/:categorySlug}/?search=query
-router.get("/categories{/:categorySlug}", optionalAuth, async (req, res) => {
-    const categorySlug = req.params.categorySlug;
-    const { search } = req.query;
-    const userId = req.user?.id;
+router.get(
+    "/categories{/:categorySlug}",
+    optionalAuth,
+    async (
+        req: Request<{ categorySlug?: string }, {}, {}, { search?: string }>,
+        res: Response<ProductListRes | ErrorRes>,
+    ) => {
+        const categorySlug = req.params.categorySlug;
+        const { search } = req.query;
+        const userId = req.user?.id;
 
-    let categoryData = null;
+        let categoryData = null;
 
-    if (categorySlug && typeof categorySlug !== "string") {
-        return res.status(400).json({ message: "Invalid category slug" });
-    }
-
-    if (categorySlug) {
-        [categoryData] = await db
-            .select({ id: categories.id, name: categories.name })
-            .from(categories)
-            .where(eq(categories.slug, categorySlug));
-
-        if (!categoryData) {
-            return res.status(404).json({ message: "Category not found" });
+        if (categorySlug && typeof categorySlug !== "string") {
+            return res.status(400).json({ message: "Invalid category slug" });
         }
-    }
 
-    const filters = [];
-    if (categoryData) {
-        filters.push(eq(products.categoryId, categoryData.id));
-    }
+        if (categorySlug) {
+            [categoryData] = await db
+                .select({ id: categories.id, name: categories.name })
+                .from(categories)
+                .where(eq(categories.slug, categorySlug));
 
-    if (search) {
-        filters.push(sql`
+            if (!categoryData) {
+                return res.status(404).json({ message: "Category not found" });
+            }
+        }
+
+        const filters = [];
+        if (categoryData) {
+            filters.push(eq(products.categoryId, categoryData.id));
+        }
+
+        if (search) {
+            filters.push(sql`
             (${products.title} ILIKE ${"%" + search + "%"}
             OR 
             (set_limit(0.10) IS NOT NULL AND ${products.title} % ${search}))
         `);
-    }
+        }
 
-    const relevance = search
-        ? sql<number>`similarity(${products.title}, ${search})`
-        : sql<number>`1`;
+        const relevance = search
+            ? sql<number>`similarity(${products.title}, ${search})`
+            : sql<number>`1`;
 
-    const query = db
-        .select({
-            id: products.id,
-            title: products.title,
-            slug: products.slug,
-            price: products.price,
-            image: products.image,
-            quantity: (userId
-                ? sql<number>`COALESCE(${cartItems.quantity}, 0)`
-                : sql<number>`0`
-            ).as("quantity"),
-        })
-        .from(products);
+        const query = db
+            .select({
+                id: products.id,
+                title: products.title,
+                slug: products.slug,
+                price: products.price,
+                image: products.image,
+                quantity: (userId
+                    ? sql<number>`COALESCE(${cartItems.quantity}, 0)`
+                    : sql<number>`0`
+                ).as("quantity"),
+            })
+            .from(products);
 
-    if (userId) {
-        query
-            .leftJoin(carts, eq(carts.userId, userId))
-            .leftJoin(
-                cartItems,
-                and(
-                    eq(cartItems.productId, products.id),
-                    eq(cartItems.cartId, carts.id),
-                ),
-            );
-    }
+        if (userId) {
+            query
+                .leftJoin(carts, eq(carts.userId, userId))
+                .leftJoin(
+                    cartItems,
+                    and(
+                        eq(cartItems.productId, products.id),
+                        eq(cartItems.cartId, carts.id),
+                    ),
+                );
+        }
 
-    const productList = await query
-        .where(and(...filters))
-        .orderBy(() => (search ? desc(relevance) : products.id));
+        const productList = await query
+            .where(and(...filters))
+            .orderBy(() => (search ? desc(relevance) : products.id));
 
-    res.json({
-        ...(categoryData && { categoryName: categoryData.name }),
-        products: productList,
-    });
-});
+        res.json({
+            ...(categoryData && { categoryName: categoryData.name }),
+            products: productList,
+        });
+    },
+);
 
 // GET /:productSlug
-router.get("/:productSlug", optionalAuth, async (req, res) => {
-    const { productSlug } = req.params;
-    const userId = req.user?.id;
+router.get(
+    "/:productSlug",
+    optionalAuth,
+    async (
+        req: Request<{ productSlug: string }>,
+        res: Response<ProductDetailsRes | ErrorRes>,
+    ) => {
+        const { productSlug } = req.params;
+        const userId = req.user?.id;
 
-    if (typeof productSlug !== "string") {
-        return res.status(400).json({ message: "Invalid product slug" });
-    }
+        if (typeof productSlug !== "string") {
+            return res.status(400).json({ message: "Invalid product slug" });
+        }
 
-    const query = db
-        .select({
-            id: products.id,
-            title: products.title,
-            price: products.price,
-            description: products.description,
-            image: products.image,
-            quantity: (userId
-                ? sql<number>`COALESCE(${cartItems.quantity}, 0)`
-                : sql<number>`0`
-            ).as("quantity"),
-        })
-        .from(products)
-        .where(eq(products.slug, productSlug));
+        const query = db
+            .select({
+                id: products.id,
+                title: products.title,
+                slug: products.slug,
+                price: products.price,
+                description: products.description,
+                image: products.image,
+                quantity: (userId
+                    ? sql<number>`COALESCE(${cartItems.quantity}, 0)`
+                    : sql<number>`0`
+                ).as("quantity"),
+            })
+            .from(products)
+            .where(eq(products.slug, productSlug));
 
-    if (userId) {
-        query
-            .leftJoin(carts, eq(carts.userId, userId))
-            .leftJoin(
-                cartItems,
-                and(
-                    eq(cartItems.productId, products.id),
-                    eq(cartItems.cartId, carts.id),
-                ),
-            );
-    }
+        if (userId) {
+            query
+                .leftJoin(carts, eq(carts.userId, userId))
+                .leftJoin(
+                    cartItems,
+                    and(
+                        eq(cartItems.productId, products.id),
+                        eq(cartItems.cartId, carts.id),
+                    ),
+                );
+        }
 
-    const [product] = await query;
+        const [product] = await query;
 
-    if (!product) return res.status(404).json({ message: "Product not found" });
-    res.json(product);
-});
+        if (!product)
+            return res.status(404).json({ message: "Product not found" });
+        res.json(product);
+    },
+);
 
+// ADMIN
 // POST /
-router.post("/", authenticateToken, isAdmin, async (req, res) => {
-    const [insertedProduct] = await db
-        .insert(products)
-        .values(req.body)
-        .returning();
-    res.status(201).json(insertedProduct);
-});
+router.post(
+    "/",
+    authenticateToken,
+    isAdmin,
+    async (
+        req: Request<{}, {}, ProductAdminReq>,
+        res: Response<ProductAdminRes | ErrorRes>,
+    ) => {
+        const [insertedProduct] = await db
+            .insert(products)
+            .values(req.body)
+            .returning();
+
+        res.status(201).json(insertedProduct);
+    },
+);
 
 // PUT /:id
-router.put("/:id", authenticateToken, isAdmin, async (req, res) => {
-    const { id } = req.params;
-    const [updatedProduct] = await db
-        .update(products)
-        .set(req.body)
-        .where(eq(products.id, Number(id)))
-        .returning();
+router.put(
+    "/:id",
+    authenticateToken,
+    isAdmin,
+    async (
+        req: Request<{ id: string }, {}, ProductAdminReq>,
+        res: Response<ProductAdminRes | ErrorRes>,
+    ) => {
+        const { id } = req.params;
+        const [updatedProduct] = await db
+            .update(products)
+            .set(req.body)
+            .where(eq(products.id, Number(id)))
+            .returning();
 
-    if (!updatedProduct)
-        return res.status(404).json({ message: "Product not found" });
-    res.json(updatedProduct);
-});
+        if (!updatedProduct)
+            return res.status(404).json({ message: "Product not found" });
+        res.json(updatedProduct);
+    },
+);
 
 // DELETE /:id
-router.delete("/:id", authenticateToken, isAdmin, async (req, res) => {
-    const { id } = req.params;
-    const [deletedProduct] = await db
-        .delete(products)
-        .where(eq(products.id, Number(id)))
-        .returning();
+router.delete(
+    "/:id",
+    authenticateToken,
+    isAdmin,
+    async (
+        req: Request<{ id: string }>,
+        res: Response<ProductAdminRes | ErrorRes>,
+    ) => {
+        const { id } = req.params;
+        const [deletedProduct] = await db
+            .delete(products)
+            .where(eq(products.id, Number(id)))
+            .returning();
 
-    if (!deletedProduct)
-        return res.status(404).json({ message: "Product not found" });
-    res.json(deletedProduct);
-});
+        if (!deletedProduct)
+            return res.status(404).json({ message: "Product not found" });
+        res.json(deletedProduct);
+    },
+);
 
 export default router;

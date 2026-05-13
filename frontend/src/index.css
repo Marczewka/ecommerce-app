@@ -51,3 +51,7 @@
 h1 {
   @apply mb-8 text-center text-4xl font-bold;
 }
+
+h2 {
+  @apply text-2xl;
+}

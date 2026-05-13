@@ -5,10 +5,11 @@ import { setCredentials } from "../features/authSlice";
 import api from "../api/axios";
 import axios from "axios";
 import { setCart } from "../features/cartSlice";
+import type { AuthReq, AuthRes } from "@shared/dtos";
 
 const Register = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState<AuthReq["username"]>("");
+  const [password, setPassword] = useState<AuthReq["password"]>("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -20,6 +21,7 @@ const Register = () => {
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
+    setErrors(newErrors);
 
     if (!isUsernameLongEnough)
       newErrors.usernameLength = "At least 3 characters";
@@ -33,8 +35,12 @@ const Register = () => {
 
     setIsLoading(true);
     try {
-      const { data } = await api.post("users/register", { username, password });
-      dispatch(setCredentials({ user: data.user, token: data.token }));
+      const registerRes = await api.post<AuthRes>("/users/login", {
+        username,
+        password,
+      });
+      const { user, token } = registerRes.data;
+      dispatch(setCredentials({ user, token }));
       dispatch(setCart([]));
       window.location.href = "/";
     } catch (error) {

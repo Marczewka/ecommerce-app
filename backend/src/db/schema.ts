@@ -1,4 +1,4 @@
-import { relations, sql } from "drizzle-orm";
+import { sql, type InferSelectModel, type InferInsertModel } from "drizzle-orm";
 import {
     check,
     decimal,
@@ -15,6 +15,7 @@ export const categories = pgTable("categories", {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
     name: varchar("name", { length: 255 }).notNull().unique(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const products = pgTable(
@@ -29,6 +30,7 @@ export const products = pgTable(
             .references(() => categories.id, { onDelete: "restrict" })
             .notNull(),
         image: text("image"),
+        createdAt: timestamp("created_at").defaultNow().notNull(),
     },
     (table) => [
         check("price_check", sql`${table.price} >= 0`),
@@ -42,7 +44,7 @@ export const users = pgTable("users", {
     username: varchar("username", { length: 255 }).notNull().unique(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
     role: varchar("role", { length: 255 }).notNull().default("client"),
-    createdAt: timestamp("created_at").defaultNow(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const carts = pgTable("carts", {
@@ -64,9 +66,22 @@ export const cartItems = pgTable(
             .notNull()
             .references(() => products.id),
         quantity: integer("quantity").notNull().default(1),
+        updatedAt: timestamp("updated_at").defaultNow().notNull(),
     },
     (table) => [
         unique("cart_product_unique").on(table.cartId, table.productId),
         check("quantity_check", sql`${table.quantity} > 0`),
     ],
 );
+
+export type Category = InferSelectModel<typeof categories>;
+export type Product = InferSelectModel<typeof products>;
+export type User = InferSelectModel<typeof users>;
+export type Cart = InferSelectModel<typeof carts>;
+export type CartItem = InferSelectModel<typeof cartItems>;
+
+export type NewCategory = InferInsertModel<typeof categories>;
+export type NewProduct = InferInsertModel<typeof products>;
+export type NewUser = InferInsertModel<typeof users>;
+export type NewCart = InferInsertModel<typeof carts>;
+export type NewCartItem = InferInsertModel<typeof cartItems>;

@@ -1,9 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import type { ErrorRes, UserRes, UserRole } from "../../../shared/dtos.js";
 
 export const authenticateToken = (
     req: Request,
-    res: Response,
+    res: Response<ErrorRes>,
     next: NextFunction,
 ) => {
     const authHeader = req.headers["authorization"];
@@ -14,22 +15,14 @@ export const authenticateToken = (
     }
 
     if (!process.env.JWT_SECRET) {
-        return res.status(500).json({ message: "JWT_SECRET is not defined" });
+        throw new Error("JWT_SECRET is missing");
     }
 
     try {
         const secret = process.env.JWT_SECRET;
-        const decoded = jwt.verify(token, secret) as {
-            id: number;
-            username: string;
-            role: string;
-        };
+        const decoded = jwt.verify(token, secret) as UserRes;
 
-        req.user = {
-            id: decoded.id,
-            username: decoded.username,
-            role: decoded.role,
-        };
+        req.user = decoded;
 
         next();
     } catch {

@@ -5,10 +5,11 @@ import { setCredentials } from "../features/authSlice";
 import api from "../api/axios";
 import axios from "axios";
 import { setCart } from "../features/cartSlice";
+import type { AuthReq, AuthRes, ProductItemRes } from "@shared/dtos";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState<AuthReq["username"]>("");
+  const [password, setPassword] = useState<AuthReq["password"]>("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
@@ -16,6 +17,7 @@ export default function Login() {
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const newErrors: { [key: string]: string } = {};
+    setErrors(newErrors);
 
     if (username.trim().length === 0)
       newErrors.username = "Username is required";
@@ -29,15 +31,14 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const loginRes = await api.post("/users/login", { username, password });
-      dispatch(
-        setCredentials({
-          user: loginRes.data.user,
-          token: loginRes.data.token,
-        }),
-      );
-      const cartRes = await api.get("/carts/my-cart");
-      dispatch(setCart(cartRes.data));
+      const loginRes = await api.post<AuthRes>("/users/login", {
+        username,
+        password,
+      });
+      const { user, token } = loginRes.data;
+      dispatch(setCredentials({ user, token }));
+      const { data } = await api.get<ProductItemRes[]>("/carts/my-cart");
+      dispatch(setCart(data));
       window.location.href = "/";
     } catch (error) {
       if (axios.isAxiosError(error)) {
@@ -52,8 +53,18 @@ export default function Login() {
     }
   };
 
+  const handleClientCredentials = async () => {
+    setUsername("client");
+    setPassword("Password");
+  };
+
+  const handleAdminCredentials = async () => {
+    setUsername("admin");
+    setPassword("Password");
+  };
+
   return (
-    <div className="flex min-h-[80vh] items-center justify-center">
+    <div className="flex min-h-[80vh] flex-col items-center justify-center">
       <form
         onSubmit={handleSubmit}
         noValidate
@@ -132,6 +143,16 @@ export default function Login() {
           </Link>
         </p>
       </form>
+      <button
+        onClick={handleClientCredentials}
+        className="link mt-16 cursor-pointer"
+      >
+        Client credentials
+      </button>
+
+      <button onClick={handleAdminCredentials} className="link cursor-pointer">
+        Admin credentials
+      </button>
     </div>
   );
 }

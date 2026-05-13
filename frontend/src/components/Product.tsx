@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import type { GetProductFromSlugResponse } from "../../../shared/types/api";
+import type { CartItemRes, ProductDetailsRes } from "@shared/dtos";
 import { QuantityButton } from "./QuantityButton";
 import api from "../api/axios";
 import { useDispatch } from "react-redux";
@@ -9,16 +9,16 @@ import { addItem, removeItem, updateQuantity } from "../features/cartSlice";
 
 export default function Product() {
   const { productSlug } = useParams();
-  const [product, setProduct] = useState<GetProductFromSlugResponse | null>(
-    null,
-  );
+  const [product, setProduct] = useState<ProductDetailsRes | null>(null);
   const dispatch = useDispatch();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
     const getProduct = async () => {
       try {
-        const { data } = await api.get(`/products/${productSlug}`);
+        const { data } = await api.get<ProductDetailsRes>(
+          `/products/${productSlug}`,
+        );
         setProduct(data);
       } catch (error) {
         console.error(error);
@@ -30,7 +30,7 @@ export default function Product() {
 
   const quantity = useAppSelector((state) => {
     const itemInCart = state.cart.find((item) => item.id === product?.id);
-    return itemInCart ? itemInCart.quantity : 0;
+    return itemInCart?.quantity ? itemInCart.quantity : 0;
   });
 
   const handleQuantity = async (type: "plus" | "minus") => {
@@ -41,20 +41,20 @@ export default function Product() {
     try {
       if (type === "plus") {
         if (quantity === 0) {
-          await api.post(endpoint);
+          await api.post<CartItemRes>(endpoint);
           dispatch(addItem(product));
         } else {
           const newQuantity = quantity + 1;
-          await api.put(endpoint, { quantity: newQuantity });
+          await api.put<CartItemRes>(endpoint, { quantity: newQuantity });
           dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       } else if (type === "minus") {
         if (quantity === 1) {
-          await api.delete(endpoint);
+          await api.delete<CartItemRes>(endpoint);
           dispatch(removeItem(product.id));
         } else {
           const newQuantity = quantity - 1;
-          await api.put(endpoint, { quantity: newQuantity });
+          await api.put<CartItemRes>(endpoint, { quantity: newQuantity });
           dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       }

@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/authSlice";
 import { setCart } from "../features/cartSlice";
 import api from "../api/axios";
+import type { ProductItemRes, UserRes } from "@shared/dtos";
 
 export default function Root() {
   const dispatch = useDispatch();
@@ -15,9 +16,9 @@ export default function Root() {
       if (!token) return;
 
       try {
-        const authData = await api.get("auth/me");
+        const authData = await api.get<UserRes>("auth/me");
         dispatch(setCredentials({ user: authData.data, token }));
-        const cartData = await api.get("/carts/my-cart");
+        const cartData = await api.get<ProductItemRes[]>("/carts/my-cart");
         dispatch(setCart(cartData.data));
       } catch (error) {
         console.error(error);

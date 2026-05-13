@@ -1,21 +1,17 @@
 import { Link } from "react-router-dom";
-import type { GetAllProductsResponse } from "../../../shared/types/api";
+import type { CartItemRes, ProductItemRes } from "@shared/dtos";
 import { QuantityButton } from "./QuantityButton";
 import { useAppSelector } from "../app/store";
 import api from "../api/axios";
 import { useDispatch } from "react-redux";
 import { addItem, removeItem, updateQuantity } from "../features/cartSlice";
 
-export default function ProductCard({
-  product,
-}: {
-  product: GetAllProductsResponse[number];
-}) {
+export default function ProductCard({ product }: { product: ProductItemRes }) {
   const dispatch = useDispatch();
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const quantity = useAppSelector((state) => {
     const itemInCart = state.cart.find((item) => item.id === product?.id);
-    return itemInCart ? itemInCart.quantity : 0;
+    return itemInCart?.quantity ? itemInCart.quantity : 0;
   });
 
   const handleQuantity = async (type: "plus" | "minus") => {
@@ -26,20 +22,24 @@ export default function ProductCard({
     try {
       if (type === "plus") {
         if (quantity === 0) {
-          await api.post(endpoint);
+          await api.post<CartItemRes>(endpoint);
           dispatch(addItem(product));
         } else {
           const newQuantity = quantity + 1;
-          await api.put(endpoint, { quantity: newQuantity });
+          await api.put<CartItemRes>(endpoint, {
+            quantity: newQuantity,
+          });
           dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       } else if (type === "minus") {
         if (quantity === 1) {
-          await api.delete(endpoint);
+          await api.delete<CartItemRes>(endpoint);
           dispatch(removeItem(product.id));
         } else {
           const newQuantity = quantity - 1;
-          await api.put(endpoint, { quantity: newQuantity });
+          await api.put<CartItemRes>(endpoint, {
+            quantity: newQuantity,
+          });
           dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       }
@@ -63,7 +63,7 @@ export default function ProductCard({
             />
           )}
         </div>
-        <div className="bg-slate-50 p-3 transition-colors group-hover:bg-gray-100">
+        <div className="bg-slate-50 p-3 transition-colors group-hover:bg-gray-100 group-active:bg-white">
           <div className="line-clamp-2 h-14 text-lg">{product.title}</div>
           <div className="pt-4 text-2xl">${product.price}</div>
         </div>

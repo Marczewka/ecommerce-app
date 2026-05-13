@@ -1,5 +1,11 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { AuthState } from "../../../shared/types/api";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { AuthRes, UserRes } from "@shared/dtos";
+
+type AuthState = {
+  user: UserRes | null;
+  token: AuthRes["token"] | null;
+  isAuthenticated: boolean;
+};
 
 const initialState: AuthState = {
   user: null,
@@ -11,7 +17,10 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setCredentials: (state, action) => {
+    setCredentials: (
+      state,
+      action: PayloadAction<Omit<AuthRes, "message">>,
+    ) => {
       const { user, token } = action.payload;
       state.user = user;
       state.token = token;

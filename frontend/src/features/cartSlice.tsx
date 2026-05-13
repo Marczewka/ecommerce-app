@@ -1,28 +1,31 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { ProductThumbnail } from "../../../shared/types/api";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { ProductItemRes, ProductRes } from "@shared/dtos";
 
-const initialState: ProductThumbnail[] = [];
+const initialState: ProductItemRes[] = [];
 
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    setCart: (_, action) => {
+    setCart: (_, action: PayloadAction<ProductItemRes[]>) => {
       return action.payload;
     },
 
-    addItem: (state, action) => {
+    addItem: (state, action: PayloadAction<ProductRes>) => {
       state.push({ ...action.payload, quantity: 1 });
     },
 
-    updateQuantity: (state, action) => {
+    updateQuantity: (
+      state,
+      action: PayloadAction<{ id: number; quantity: number }>,
+    ) => {
       const item = state.find((item) => item.id === action.payload.id);
       if (item) {
         item.quantity = action.payload.quantity;
       }
     },
 
-    removeItem: (state, action) => {
+    removeItem: (state, action: PayloadAction<number>) => {
       return state.filter((item) => item.id !== action.payload);
     },
   },
