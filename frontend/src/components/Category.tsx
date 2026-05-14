@@ -32,7 +32,7 @@ export default function Category() {
   }, [categorySlug, searchQuery]);
 
   return (
-    <div>
+    <div className="p-10">
       <div className="flex flex-col">
         <h1 className="mb-8 text-center text-4xl font-bold capitalize">
           {categoryName}

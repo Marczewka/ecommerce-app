@@ -6,9 +6,8 @@ import api from "../api/axios";
 import { useDispatch } from "react-redux";
 import { addItem, removeItem, updateQuantity } from "../features/cartSlice";
 
-export default function ProductCard({ product }: { product: ProductItemRes }) {
+export default function CartItem({ product }: { product: ProductItemRes }) {
   const dispatch = useDispatch();
-  const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const quantity = useAppSelector((state) => {
     const itemInCart = state.cart.find((item) => item.id === product?.id);
     return itemInCart?.quantity ? itemInCart.quantity : 0;
@@ -49,50 +48,55 @@ export default function ProductCard({ product }: { product: ProductItemRes }) {
   };
 
   return (
-    <div className="relative">
+    <div className="flex h-40 overflow-hidden rounded-lg bg-slate-50 shadow-lg">
       <Link
         to={`/products/${product.slug}`}
-        className="group flex w-60 flex-col overflow-hidden rounded-lg shadow-lg transition focus:outline-slate-400"
+        className="h-full w-1/5 bg-gray-100 focus:-outline-offset-2 focus:outline-slate-400"
       >
-        <div className="h-48 bg-gray-100 p-2">
-          {product.image && product.image.length > 0 && (
-            <img
-              src={product.image}
-              alt={product.title}
-              className="h-full w-full object-contain"
-            />
-          )}
-        </div>
-        <div className="bg-slate-50 p-3 transition-colors group-hover:bg-gray-100 group-active:bg-white">
-          <div className="line-clamp-2 h-14 text-lg font-medium text-slate-800">
-            {product.title}
-          </div>
-          <div className="pt-4 text-2xl font-bold text-slate-900">
-            ${product.price}
-          </div>
-        </div>
+        {product.image && product.image.length > 0 && (
+          <img
+            src={product.image}
+            alt={product.title}
+            className="h-full w-full object-contain p-2"
+          />
+        )}
       </Link>
 
-      {isAuthenticated && (
-        <div className="absolute right-1 bottom-1 grid grid-cols-3 items-center rounded-md border border-slate-200 bg-white p-1 shadow-sm">
-          {quantity > 0 && (
+      <div className="w-3/5 p-4">
+        <Link to={`/products/${product.slug}`}>
+          <h3 className="line-clamp-2 text-2xl font-medium text-slate-800">
+            {product.title}
+          </h3>
+        </Link>
+      </div>
+
+      <div className="flex w-1/5 flex-col items-end justify-between p-4">
+        <div className="flex flex-col items-center gap-2">
+          <div className="text-2xl font-bold text-slate-900">
+            ${Number(product.price) * quantity}
+          </div>
+
+          <div
+            className={`${quantity < 2 && "invisible"} text-sm font-bold text-slate-500`}
+          >
+            per unit ${product.price}
+          </div>
+
+          <div className="flex items-center rounded-md border border-slate-200 bg-white p-1 shadow-sm">
             <QuantityButton
               type={"minus"}
               changeQuantity={() => handleQuantity("minus")}
-            ></QuantityButton>
-          )}
-          {quantity > 0 && (
+            />
             <span className="text-md min-w-8 text-center font-semibold text-slate-700">
               {quantity}
             </span>
-          )}
-          <QuantityButton
-            type={"plus"}
-            changeQuantity={() => handleQuantity("plus")}
-            className="col-start-3"
-          ></QuantityButton>
+            <QuantityButton
+              type={"plus"}
+              changeQuantity={() => handleQuantity("plus")}
+            />
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

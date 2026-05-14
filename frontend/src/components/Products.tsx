@@ -26,7 +26,7 @@ export default function Products() {
   }, [searchQuery, token]);
 
   return (
-    <div>
+    <div className="p-10">
       <div className="flex flex-col">
         <h1>Products</h1>
         {searchQuery && (

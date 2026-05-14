@@ -2,9 +2,9 @@
 
 .btn-dark,
 .btn-light {
-  @apply flex cursor-pointer justify-center;
+  @apply flex cursor-pointer justify-center transition-all;
   &:focus {
-    @apply outline-slate-400 transition;
+    @apply outline-slate-400;
   }
   &:hover {
     @apply brightness-110;
@@ -28,7 +28,7 @@
     @apply brightness-120;
   }
   &:focus {
-    @apply outline-slate-400 transition;
+    @apply outline-slate-400;
   }
   &:hover {
     @apply brightness-110;

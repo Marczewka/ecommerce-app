@@ -31,7 +31,7 @@ export default function Root() {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <main className="grow bg-indigo-100 p-10">
+      <main className="flex grow flex-col bg-indigo-100">
         <Outlet />
       </main>
     </div>

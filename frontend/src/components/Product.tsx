@@ -64,38 +64,49 @@ export default function Product() {
   };
 
   return (
-    <div className="overflow-hidden rounded-lg shadow-lg">
-      <div className="h-100 bg-gray-100 p-2">
-        {product?.image && product.image.length > 0 && (
-          <img
-            src={product.image}
-            alt={product.title}
-            className="h-full w-full object-contain"
-          />
-        )}
-      </div>
-      <div className="bg-white p-20">
-        <div className="p-4 text-5xl">{product?.title}</div>
-        {product?.price && <div className="p-4 text-4xl">${product.price}</div>}
-        <div className="pt-8 text-gray-600">{product?.description}</div>
-      </div>
-      <div className="absolute top-135 right-100 flex items-center">
-        {quantity > 0 && (
-          <QuantityButton
-            type={"minus"}
-            changeQuantity={() => handleQuantity("minus")}
-          ></QuantityButton>
-        )}
-        {quantity > 0 && (
-          <span className="min-w-16 text-center text-2xl font-bold">
-            {quantity}
-          </span>
-        )}
+    <div className="p-10">
+      <div className="overflow-hidden rounded-lg shadow-lg">
+        <div className="h-100 bg-gray-100 p-2">
+          {product?.image && product.image.length > 0 && (
+            <img
+              src={product.image}
+              alt={product.title}
+              className="h-full w-full object-contain"
+            />
+          )}
+        </div>
+
+        <div className="bg-white p-20">
+          <div className="line-clamp-2 p-4 text-5xl text-slate-800">
+            {product?.title}
+          </div>
+          {product?.price && (
+            <div className="p-4 text-4xl font-bold text-slate-900">
+              ${product.price}
+            </div>
+          )}
+          <div className="pt-8 text-gray-600">{product?.description}</div>
+        </div>
+
         {isAuthenticated && (
-          <QuantityButton
-            type={"plus"}
-            changeQuantity={() => handleQuantity("plus")}
-          ></QuantityButton>
+          <div className="absolute top-135 left-35 grid grid-cols-3 items-center rounded-md border border-slate-200 bg-white p-1 shadow-sm">
+            {quantity > 0 && (
+              <QuantityButton
+                type={"minus"}
+                changeQuantity={() => handleQuantity("minus")}
+              ></QuantityButton>
+            )}
+            {quantity > 0 && (
+              <span className="text-md min-w-8 text-center font-semibold text-slate-700">
+                {quantity}
+              </span>
+            )}
+            <QuantityButton
+              type={"plus"}
+              changeQuantity={() => handleQuantity("plus")}
+              className="col-start-3"
+            ></QuantityButton>
+          </div>
         )}
       </div>
     </div>
