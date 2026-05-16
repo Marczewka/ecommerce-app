@@ -10,13 +10,15 @@ export default function Category() {
   const [products, setProducts] = useState<ProductListRes["products"] | null>(
     null,
   );
+  const [isLoading, setIsLoading] = useState(true);
   const [categoryName, setCategoryName] =
     useState<ProductListRes["categoryName"]>();
 
   const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
-    const getCategoryProducts = async () => {
+    const fetchCategoryProducts = async () => {
+      setIsLoading(true);
       try {
         const { data } = await api.get<ProductListRes>(
           `products/categories/${categorySlug}?search=${searchQuery}`,
@@ -25,10 +27,12 @@ export default function Category() {
         setCategoryName(data.categoryName);
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    getCategoryProducts();
+    fetchCategoryProducts();
   }, [categorySlug, searchQuery]);
 
   return (
@@ -43,13 +47,19 @@ export default function Category() {
           </p>
         )}
       </div>
-      <ul className="grid grid-cols-[repeat(auto-fit,min(240px))] justify-center justify-items-center gap-8">
-        {products?.map((product) => (
-          <li key={product.slug}>
-            <ProductCard product={product} />
-          </li>
-        ))}
-      </ul>
+      {isLoading ? (
+        <p className="animate-pulse text-center text-sm text-slate-500">
+          Loading...
+        </p>
+      ) : (
+        <ul className="grid grid-cols-[repeat(auto-fit,min(240px))] justify-center justify-items-center gap-8">
+          {products?.map((product) => (
+            <li key={product.slug}>
+              <ProductCard product={product} />
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

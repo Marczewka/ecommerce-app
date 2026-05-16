@@ -1,11 +1,11 @@
 import express from "express";
 import cors from "cors";
 import type { Request, Response, NextFunction } from "express";
-import authRouter from "./routes/auth.js";
-import productsRouter from "./routes/products.js";
-import categoriesRouter from "./routes/categories.js";
-import usersRouter from "./routes/users.js";
-import cartsRouter from "./routes/carts.js";
+import authRouter from "./routes/auth.routes.js";
+import productsRouter from "./routes/products.routes.js";
+import categoriesRouter from "./routes/categories.routes.js";
+import usersRouter from "./routes/users.routes.js";
+import cartsRouter from "./routes/carts.routes.js";
 import morgan from "morgan";
 
 const app = express();

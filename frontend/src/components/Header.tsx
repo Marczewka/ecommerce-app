@@ -22,7 +22,9 @@ export default function Header() {
   const isAuthPage =
     location.pathname === "/login" || location.pathname === "/register";
   return (
-    <nav className="sticky top-0 z-10 grid h-15 grid-cols-6 items-center bg-slate-500 text-gray-100">
+    <nav
+      className={`sticky top-0 z-50 grid h-15 grid-cols-6 items-center bg-slate-500 text-gray-100 ${auth.user?.role === "admin" && "top-8"}`}
+    >
       <div className="col-start-1 flex justify-center">
         <Link to="/" className="btn-light w-48">
           Home

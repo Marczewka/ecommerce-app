@@ -136,11 +136,3 @@ type CartItem = {
 };
 
 export type CartItemRes = Pick<CartItem, "id" | "productId" | "quantity">;
-
-export interface CartAdminRes {
-    cartId: number;
-    username: string;
-    productTitle: string;
-    quantity: number;
-    price: string;
-}

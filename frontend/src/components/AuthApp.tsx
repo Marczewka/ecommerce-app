@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import Header from "../components/Header";
 import { Outlet } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../features/authSlice";
@@ -7,13 +6,16 @@ import { setCart } from "../features/cartSlice";
 import api from "../api/axios";
 import type { ProductItemRes, UserRes } from "@shared/dtos";
 
-export default function Root() {
+export default function AuthApp() {
   const dispatch = useDispatch();
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
-      if (!token) return;
+
+      if (!token) {
+        return;
+      }
 
       try {
         const authData = await api.get<UserRes>("auth/me");
@@ -22,18 +24,12 @@ export default function Root() {
         dispatch(setCart(cartData.data));
       } catch (error) {
         console.error(error);
+        localStorage.removeItem("token");
       }
     };
 
     checkAuth();
   }, [dispatch]);
 
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex grow flex-col bg-indigo-100">
-        <Outlet />
-      </main>
-    </div>
-  );
+  return <Outlet />;
 }

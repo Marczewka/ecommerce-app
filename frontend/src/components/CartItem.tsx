@@ -16,7 +16,7 @@ export default function CartItem({ product }: { product: ProductItemRes }) {
   const handleQuantity = async (type: "plus" | "minus") => {
     if (!product) return;
 
-    const endpoint = `/carts/products/${product.id}`;
+    const endpoint = `/carts/cartItems/${product.id}`;
 
     try {
       if (type === "plus") {
