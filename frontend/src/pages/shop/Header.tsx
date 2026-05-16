@@ -2,9 +2,9 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import DropdownButton from "./DropdownButton";
 import SearchBar from "./SearchBar";
 import { useDispatch } from "react-redux";
-import { logout } from "../features/authSlice";
-import { useAppSelector } from "../app/store";
-import { setCart } from "../features/cartSlice";
+import { logout } from "../../features/authSlice";
+import { useAppSelector } from "../../app/store";
+import { setCart } from "../../features/cartSlice";
 
 export default function Header() {
   const location = useLocation();

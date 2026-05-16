@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
-import { setCredentials } from "../features/authSlice";
-import api from "../api/axios";
+import { setCredentials } from "../../features/authSlice";
+import api from "../../api/axios";
 import axios from "axios";
-import { setCart } from "../features/cartSlice";
+import { setCart } from "../../features/cartSlice";
 import type { AuthReq, AuthRes, ProductItemRes } from "@shared/dtos";
 
 export default function Login() {

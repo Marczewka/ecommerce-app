@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import type { CartItemRes, ProductItemRes } from "@shared/dtos";
 import { QuantityButton } from "./QuantityButton";
-import { useAppSelector } from "../app/store";
-import api from "../api/axios";
+import { useAppSelector } from "../../app/store";
+import api from "../../api/axios";
 import { useDispatch } from "react-redux";
-import { addItem, removeItem, updateQuantity } from "../features/cartSlice";
+import { addItem, removeItem, updateQuantity } from "../../features/cartSlice";
 
 export default function ProductCard({ product }: { product: ProductItemRes }) {
   const dispatch = useDispatch();

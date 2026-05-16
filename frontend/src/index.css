@@ -22,6 +22,10 @@
   @apply rounded bg-slate-500 p-2 text-gray-100;
 }
 
+.btn-admin {
+  @apply rounded bg-indigo-600 px-3 py-0.5 font-medium text-white transition-colors hover:bg-indigo-700;
+}
+
 .btn-list {
   @apply block bg-slate-500 pt-2 pb-2 pl-2 capitalize;
   &.active {

@@ -1,7 +1,7 @@
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../app/store";
 import { useEffect } from "react";
-import AdminHeader from "./AdminHeader";
+import AdminHeader from "../pages/admin/Header";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
@@ -25,10 +25,7 @@ export default function AdminLayout() {
             <strong>{" " + auth.user?.username}</strong>)
           </span>
         </div>
-        <Link
-          to="/"
-          className="rounded bg-indigo-600 px-3 py-0.5 font-medium text-white transition-colors hover:bg-indigo-700"
-        >
+        <Link to="/" className="btn-admin">
           Store Panel
         </Link>
       </div>

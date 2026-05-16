@@ -1,8 +1,8 @@
 import type { UserAdminRes } from "@shared/dtos";
 import { useEffect, useState } from "react";
-import api from "../api/axios";
+import api from "../../api/axios";
 
-export default function AdminUsers() {
+export default function Users() {
   const [, setUsers] = useState<UserAdminRes[]>([]);
 
   useEffect(() => {

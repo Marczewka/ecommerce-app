@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import type { CategoryRes } from "@shared/dtos";
-import api from "../api/axios";
+import api from "../../api/axios";
 
 export default function Categories({ closeMenu }: { closeMenu: () => void }) {
   const [categories, setCategories] = useState<CategoryRes[]>([]);

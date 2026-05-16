@@ -1,4 +1,4 @@
-import Header from "./Header";
+import Header from "../pages/shop/Header";
 import { Outlet, Link } from "react-router-dom";
 import { useAppSelector } from "../app/store";
 

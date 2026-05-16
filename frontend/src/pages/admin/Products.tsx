@@ -1,8 +1,8 @@
 import type { ProductAdminRes } from "@shared/dtos";
 import { useEffect, useState } from "react";
-import api from "../api/axios";
+import api from "../../api/axios";
 
-export default function AdminProducts() {
+export default function Products() {
   const [, setProducts] = useState<ProductAdminRes[]>([]);
 
   useEffect(() => {

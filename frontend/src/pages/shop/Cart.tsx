@@ -1,5 +1,5 @@
 import CartItem from "./CartItem";
-import { useAppSelector } from "../app/store";
+import { useAppSelector } from "../../app/store";
 
 export default function Cart() {
   const cart = useAppSelector((state) => state.cart);

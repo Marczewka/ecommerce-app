@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import ProductCard from "./ProductCard";
 import type { ProductListRes } from "@shared/dtos";
-import api from "../api/axios";
+import api from "../../api/axios";
 
 export default function Category() {
   const { categorySlug } = useParams();

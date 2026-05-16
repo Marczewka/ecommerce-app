@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import type { ProductItemRes, ProductListRes } from "@shared/dtos";
 import ProductCard from "./ProductCard";
-import api from "../api/axios";
+import api from "../../api/axios";
 
 export default function Products() {
   const [searchParams] = useSearchParams();

@@ -78,6 +78,6 @@ export async function deleteAdminCategory(
         .returning();
 
     if (!deletedCategory)
-        return res.status(404).json({ message: "Category notfound" });
+        return res.status(404).json({ message: "Category not found" });
     res.json(deletedCategory);
 }

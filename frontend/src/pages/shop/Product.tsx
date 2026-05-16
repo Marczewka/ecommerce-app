@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import type { CartItemRes, ProductDetailsRes } from "@shared/dtos";
 import { QuantityButton } from "./QuantityButton";
-import api from "../api/axios";
+import api from "../../api/axios";
 import { useDispatch } from "react-redux";
-import { useAppSelector } from "../app/store";
-import { addItem, removeItem, updateQuantity } from "../features/cartSlice";
+import { useAppSelector } from "../../app/store";
+import { addItem, removeItem, updateQuantity } from "../../features/cartSlice";
 
 export default function Product() {
   const { productSlug } = useParams();
