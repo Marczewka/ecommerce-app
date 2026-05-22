@@ -37,7 +37,9 @@ type User = {
     createdAt: Date;
 };
 
-export type UserRole = "admin" | "user";
+export const USER_ROLES = ["admin", "client"] as const;
+
+export type UserRole = (typeof USER_ROLES)[number];
 
 export type UserRes = Pick<User, "id" | "username"> & {
     role: UserRole;

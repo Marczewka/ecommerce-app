@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import DropdownButton from "./DropdownButton";
+import ButtonDropdown from "./ButtonDropdown";
 import SearchBar from "./SearchBar";
 import { useDispatch } from "react-redux";
 import { logout } from "../../features/authSlice";
@@ -32,7 +32,7 @@ export default function Header() {
       </div>
 
       <div className="col-start-2 flex justify-center">
-        {!isAuthPage && <DropdownButton />}
+        {!isAuthPage && <ButtonDropdown />}
       </div>
 
       <div className="col-span-2 col-start-3 flex justify-center">

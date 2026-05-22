@@ -26,7 +26,7 @@ export async function getCategories(
 }
 
 // ADMIN
-// GET /admin
+// GET
 export async function getAdminCategories(
     req: Request,
     res: Response<CategoryAdminRes[]>,
@@ -36,7 +36,7 @@ export async function getAdminCategories(
     res.json(allCategories);
 }
 
-// POST /admin
+// POST
 export async function createAdminCategory(
     req: Request<{}, {}, CategoryAdminReq>,
     res: Response<CategoryAdminRes | ErrorRes>,
@@ -49,7 +49,7 @@ export async function createAdminCategory(
     res.status(201).json(insertedCategory);
 }
 
-// PUT /admin/:id
+// PUT /:id
 export async function updateAdminCategory(
     req: Request<{ id: string }, {}, CategoryAdminReq>,
     res: Response<CategoryAdminRes | ErrorRes>,
@@ -66,7 +66,7 @@ export async function updateAdminCategory(
     res.json(updatedCategory);
 }
 
-// DELETE /admin/:id
+// DELETE /:id
 export async function deleteAdminCategory(
     req: Request<{ id: string }>,
     res: Response<CategoryAdminRes | ErrorRes>,

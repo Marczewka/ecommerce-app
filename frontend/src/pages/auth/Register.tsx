@@ -43,13 +43,13 @@ const Register = () => {
       dispatch(setCredentials({ user, token }));
       dispatch(setCart([]));
       window.location.href = "/";
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const message = error.response?.data.message;
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const message = err.response?.data.message;
         setErrors({ form: message });
       } else {
         setErrors({ form: "Connection refused" });
-        console.error(error);
+        console.error(err);
       }
     } finally {
       setIsLoading(false);

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import type { CartItemRes, ProductItemRes } from "@shared/dtos";
-import { QuantityButton } from "./QuantityButton";
+import { ButtonQuantity } from "./ButtonQuantity";
 import { useAppSelector } from "../../app/store";
 import api from "../../api/axios";
 import { useDispatch } from "react-redux";
@@ -42,8 +42,8 @@ export default function CartItem({ product }: { product: ProductItemRes }) {
           dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -83,14 +83,14 @@ export default function CartItem({ product }: { product: ProductItemRes }) {
           </div>
 
           <div className="flex items-center rounded-md border border-slate-200 bg-white p-1 shadow-sm">
-            <QuantityButton
+            <ButtonQuantity
               type={"minus"}
               changeQuantity={() => handleQuantity("minus")}
             />
             <span className="text-md min-w-8 text-center font-semibold text-slate-700">
               {quantity}
             </span>
-            <QuantityButton
+            <ButtonQuantity
               type={"plus"}
               changeQuantity={() => handleQuantity("plus")}
             />

@@ -19,8 +19,8 @@ export default function Products() {
           `products/categories/?search=${searchQuery}`,
         );
         setProducts(data.products);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setIsLoading(false);
       }

@@ -5,8 +5,9 @@ import { setCredentials } from "../features/authSlice";
 import { setCart } from "../features/cartSlice";
 import api from "../api/axios";
 import type { ProductItemRes, UserRes } from "@shared/dtos";
+import { Toaster } from "sonner";
 
-export default function AuthApp() {
+export default function RootLayout() {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -22,8 +23,8 @@ export default function AuthApp() {
         dispatch(setCredentials({ user: authData.data, token }));
         const cartData = await api.get<ProductItemRes[]>("/carts/my-cart");
         dispatch(setCart(cartData.data));
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
         localStorage.removeItem("token");
       }
     };
@@ -31,5 +32,10 @@ export default function AuthApp() {
     checkAuth();
   }, [dispatch]);
 
-  return <Outlet />;
+  return (
+    <>
+      <Toaster richColors closeButton position="bottom-right" />
+      <Outlet />
+    </>
+  );
 }

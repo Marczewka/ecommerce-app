@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Categories from "./Categories";
 
-export default function DropdownButton() {
+export default function ButtonDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 

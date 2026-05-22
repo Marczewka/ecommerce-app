@@ -1,8 +1,9 @@
 import type { CategoryAdminRes } from "@shared/dtos";
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import RowEdit from "./CategoriesRow";
-import RowAdd from "./RowAdd";
+import CategoriesRow from "./CategoriesRow";
+import CategoriesAdd from "./CategoriesAdd";
+import ButtonAdd from "./ButtonAdd";
 
 export default function Categories() {
   const [categories, setCategories] = useState<CategoryAdminRes[]>([]);
@@ -12,10 +13,10 @@ export default function Categories() {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const { data } = await api.get<CategoryAdminRes[]>("/categories/admin");
+      const { data } = await api.get<CategoryAdminRes[]>("/admin/categories");
       setCategories(data);
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsLoading(false);
     }
@@ -26,40 +27,41 @@ export default function Categories() {
   }, []);
 
   return (
-    <div className="flex flex-col bg-white">
+    <div className="flex flex-col rounded-lg bg-white p-4 shadow-sm">
       {isLoading ? (
         <p className="animate-pulse text-center text-slate-500">Loading...</p>
       ) : (
-        <>
-          <table className="w-full text-center">
-            <tr className="bg-slate-100">
-              <th>id</th>
-              <th>name</th>
-              <th>slug</th>
-              <th>createdAt</th>
-              <th>actions</th>
-            </tr>
+        <div className="flex flex-col items-center overflow-x-auto">
+          <table className="w-full table-fixed border-collapse text-center">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-100 font-semibold text-slate-700">
+                <th className="w-[10%] p-3 text-xs">ID</th>
+                <th className="w-[30%] p-3 text-xs">NAME</th>
+                <th className="w-[30%] p-3 text-xs">SLUG</th>
+                <th className="w-[15%] p-3 text-xs">CREATEDAT</th>
+                <th className="w-[15%] p-3 text-xs">ACTIONS</th>
+              </tr>
+            </thead>
 
-            {categories.map((category) => (
-              <RowEdit category={category} fetchCategories={fetchCategories} />
-            ))}
+            <tbody>
+              {categories.map((category) => (
+                <CategoriesRow
+                  key={category.id}
+                  category={category}
+                  fetchCategories={fetchCategories}
+                />
+              ))}
 
-            <RowAdd
-              isAdding={isAdding}
-              setIsAdding={setIsAdding}
-              getCategories={fetchCategories}
-            />
+              <CategoriesAdd
+                isAdding={isAdding}
+                setIsAdding={setIsAdding}
+                getCategories={fetchCategories}
+              />
+            </tbody>
           </table>
 
-          {!isAdding && (
-            <button
-              className="mt-6 cursor-pointer justify-self-center text-indigo-500"
-              onClick={() => setIsAdding(true)}
-            >
-              Add
-            </button>
-          )}
-        </>
+          {!isAdding && <ButtonAdd handleAdd={() => setIsAdding(true)} />}
+        </div>
       )}
     </div>
   );

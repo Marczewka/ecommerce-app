@@ -136,7 +136,7 @@ export async function getProduct(
 }
 
 // ADMIN
-// GET /admin
+// GET
 export async function getAdminProducts(
     req: Request,
     res: Response<ProductAdminRes[]>,
@@ -146,7 +146,7 @@ export async function getAdminProducts(
     res.json(allProducts);
 }
 
-// POST /admin
+// POST
 export async function createAdminProduct(
     req: Request<{}, {}, ProductAdminReq>,
     res: Response<ProductAdminRes | ErrorRes>,
@@ -159,7 +159,7 @@ export async function createAdminProduct(
     res.status(201).json(insertedProduct);
 }
 
-// PUT /admin/:id
+// PUT /:id
 export async function updateAdminProduct(
     req: Request<{ id: string }, {}, ProductAdminReq>,
     res: Response<ProductAdminRes | ErrorRes>,
@@ -176,7 +176,7 @@ export async function updateAdminProduct(
     res.json(updatedProduct);
 }
 
-// DELETE /admin/:id
+// DELETE /:id
 export async function deleteAdminProduct(
     req: Request<{ id: string }>,
     res: Response<ProductAdminRes | ErrorRes>,

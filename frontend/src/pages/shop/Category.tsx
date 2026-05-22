@@ -25,8 +25,8 @@ export default function Category() {
         );
         setProducts(data.products);
         setCategoryName(data.categoryName);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setIsLoading(false);
       }

@@ -10,6 +10,7 @@ import {
     unique,
     varchar,
 } from "drizzle-orm/pg-core";
+import type { UserRole } from "../../../shared/dtos.js";
 
 export const categories = pgTable("categories", {
     id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
@@ -43,7 +44,10 @@ export const users = pgTable("users", {
     id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     username: varchar("username", { length: 255 }).notNull().unique(),
     passwordHash: varchar("password_hash", { length: 255 }).notNull(),
-    role: varchar("role", { length: 255 }).notNull().default("client"),
+    role: varchar("role", { length: 255 })
+        .$type<UserRole>()
+        .notNull()
+        .default("client"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

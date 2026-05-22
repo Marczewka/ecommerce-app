@@ -4,23 +4,18 @@ import { isAdmin } from "../middleware/admin.middleware.js";
 import {
     deleteAdminUser,
     getAdminUsers,
-    login,
-    register,
+    updateAdminUser,
 } from "../controllers/users.controllers.js";
 
 const router = express.Router();
 
-// POST /register
-router.post("/register", register);
+// GET
+router.get("/", authenticateToken, isAdmin, getAdminUsers);
 
-// POST /login
-router.post("/login", login);
+// PUT
+router.put("/:id", authenticateToken, isAdmin, updateAdminUser);
 
-// ADMIN
-// GET /admin
-router.get("/admin", authenticateToken, isAdmin, getAdminUsers);
-
-// DELETE /admin/:id
-router.delete("/admin/:id", authenticateToken, isAdmin, deleteAdminUser);
+// DELETE /:id
+router.delete("/:id", authenticateToken, isAdmin, deleteAdminUser);
 
 export default router;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import type { CartItemRes, ProductDetailsRes } from "@shared/dtos";
-import { QuantityButton } from "./QuantityButton";
+import { ButtonQuantity } from "./ButtonQuantity";
 import api from "../../api/axios";
 import { useDispatch } from "react-redux";
 import { useAppSelector } from "../../app/store";
@@ -22,8 +22,8 @@ export default function Product() {
           `/products/${productSlug}`,
         );
         setProduct(data);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
@@ -62,8 +62,8 @@ export default function Product() {
           dispatch(updateQuantity({ id: product.id, quantity: newQuantity }));
         }
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -100,21 +100,21 @@ export default function Product() {
           {isAuthenticated && (
             <div className="absolute top-135 left-35 grid grid-cols-3 items-center rounded-md border border-slate-200 bg-white p-1 shadow-sm">
               {quantity > 0 && (
-                <QuantityButton
+                <ButtonQuantity
                   type={"minus"}
                   changeQuantity={() => handleQuantity("minus")}
-                ></QuantityButton>
+                ></ButtonQuantity>
               )}
               {quantity > 0 && (
                 <span className="text-md min-w-8 text-center font-semibold text-slate-700">
                   {quantity}
                 </span>
               )}
-              <QuantityButton
+              <ButtonQuantity
                 type={"plus"}
                 changeQuantity={() => handleQuantity("plus")}
                 className="col-start-3"
-              ></QuantityButton>
+              ></ButtonQuantity>
             </div>
           )}
         </div>

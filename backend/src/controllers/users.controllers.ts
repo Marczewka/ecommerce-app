@@ -130,8 +130,11 @@ export async function login(
 }
 
 // ADMIN
-// GET /admin
-export async function getAdminUsers(res: Response<UserAdminRes[]>) {
+// GET
+export async function getAdminUsers(
+    _req: Request,
+    res: Response<UserAdminRes[]>,
+) {
     const safeUsers = await db
         .select({
             id: users.id,
@@ -144,7 +147,33 @@ export async function getAdminUsers(res: Response<UserAdminRes[]>) {
     res.json(safeUsers);
 }
 
-// DELETE /admin/:id
+// PUT /:id
+export async function updateAdminUser(
+    req: Request<{ id: string }, {}, { role: UserRole }>,
+    res: Response<UserAdminRes | ErrorRes>,
+) {
+    const { id } = req.params;
+    const { role } = req.body;
+
+    const [updatedUser] = await db
+        .update(users)
+        .set({ role })
+        .where(eq(users.id, Number(id)))
+        .returning({
+            id: users.id,
+            username: users.username,
+            role: users.role,
+            createdAt: users.createdAt,
+        });
+
+    if (!updatedUser) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(updatedUser);
+}
+
+// DELETE /:id
 export async function deleteAdminUser(
     req: Request<{ id: string }>,
     res: Response<UserAdminRes | ErrorRes>,

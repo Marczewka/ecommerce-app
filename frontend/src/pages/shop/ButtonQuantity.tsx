@@ -1,4 +1,4 @@
-export function QuantityButton({
+export function ButtonQuantity({
   type,
   changeQuantity,
   className,

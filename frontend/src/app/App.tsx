@@ -6,7 +6,7 @@ import {
   createRoutesFromElements,
 } from "react-router-dom";
 
-import AuthApp from "../layouts/RootLayout";
+import RootLayout from "../layouts/RootLayout";
 
 import Category from "../pages/shop/Category";
 import Products from "../pages/shop/Products";
@@ -22,7 +22,7 @@ import AdminUsers from "../pages/admin/Users";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<AuthApp />}>
+    <Route element={<RootLayout />}>
       <Route path="/" element={<StoreLayout />}>
         <Route index element={<Products />} />
         <Route path="categories/:categorySlug" element={<Category />} />

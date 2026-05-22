@@ -14,8 +14,8 @@ export default function Categories({ closeMenu }: { closeMenu: () => void }) {
       try {
         const { data } = await api.get<CategoryRes[]>("/categories");
         setCategories(data);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
