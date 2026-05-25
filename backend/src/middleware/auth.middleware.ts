@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import type { ErrorRes, UserRes, UserRole } from "../../../shared/dtos.js";
+import type { MessageRes, UserRes, UserRole } from "../../../shared/dtos.js";
 
 export const authenticateToken = (
     req: Request,
-    res: Response<ErrorRes>,
+    res: Response<MessageRes>,
     next: NextFunction,
 ) => {
     const authHeader = req.headers["authorization"];

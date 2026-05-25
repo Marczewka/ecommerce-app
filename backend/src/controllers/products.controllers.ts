@@ -3,17 +3,19 @@ import { db } from "../db/index.js";
 import { products, cartItems, carts, categories } from "../db/schema.js";
 import type { Request, Response } from "express";
 import type {
-    ErrorRes,
+    MessageRes,
     ProductDetailsRes,
     ProductListRes,
     ProductAdminReq,
     ProductAdminRes,
 } from "../../../shared/dtos.js";
+import slugify from "slugify";
+import { or } from "drizzle-orm";
 
 // GET /categories{/:categorySlug}/?search=query
 export async function getProducts(
     req: Request<{ categorySlug?: string }, {}, {}, { search?: string }>,
-    res: Response<ProductListRes | ErrorRes>,
+    res: Response<ProductListRes | MessageRes>,
 ) {
     const categorySlug = req.params.categorySlug;
     const { search } = req.query;
@@ -29,7 +31,8 @@ export async function getProducts(
         [categoryData] = await db
             .select({ id: categories.id, name: categories.name })
             .from(categories)
-            .where(eq(categories.slug, categorySlug));
+            .where(eq(categories.slug, categorySlug))
+            .limit(1);
 
         if (!categoryData) {
             return res.status(404).json({ message: "Category not found" });
@@ -92,7 +95,7 @@ export async function getProducts(
 // GET /:productSlug
 export async function getProduct(
     req: Request<{ productSlug: string }>,
-    res: Response<ProductDetailsRes | ErrorRes>,
+    res: Response<ProductDetailsRes | MessageRes>,
 ) {
     const { productSlug } = req.params;
     const userId = req.user?.id;
@@ -138,7 +141,7 @@ export async function getProduct(
 // ADMIN
 // GET
 export async function getAdminProducts(
-    req: Request,
+    _req: Request,
     res: Response<ProductAdminRes[]>,
 ) {
     const allProducts = await db.select().from(products);
@@ -149,11 +152,53 @@ export async function getAdminProducts(
 // POST
 export async function createAdminProduct(
     req: Request<{}, {}, ProductAdminReq>,
-    res: Response<ProductAdminRes | ErrorRes>,
+    res: Response<ProductAdminRes | MessageRes>,
 ) {
+    const { title, slug, price, description, categoryId, image } = req.body;
+
+    if (Number(price) < 0) {
+        return res.status(400).json({ message: "Price cannot be negative" });
+    }
+
+    const [existingCategory] = await db
+        .select()
+        .from(categories)
+        .where(eq(categories.id, Number(categoryId)))
+        .limit(1);
+
+    if (!existingCategory) {
+        return res.status(404).json({ message: "Category not found" });
+    }
+
+    const [existingProduct] = await db
+        .select({ title: products.title, slug: products.slug })
+        .from(products)
+        .where(or(eq(products.title, title), eq(products.slug, slug)))
+        .limit(1);
+
+    if (existingProduct) {
+        if (existingProduct.title === title) {
+            return res
+                .status(400)
+                .json({ message: "Product with this title already exists" });
+        }
+        if (existingProduct.slug === slug) {
+            return res
+                .status(400)
+                .json({ message: "Product with this slug already exists" });
+        }
+    }
+
     const [insertedProduct] = await db
         .insert(products)
-        .values(req.body)
+        .values({
+            title,
+            slug: slug,
+            price: price,
+            description: description,
+            categoryId: categoryId,
+            image: image,
+        })
         .returning();
 
     res.status(201).json(insertedProduct);
@@ -162,12 +207,54 @@ export async function createAdminProduct(
 // PUT /:id
 export async function updateAdminProduct(
     req: Request<{ id: string }, {}, ProductAdminReq>,
-    res: Response<ProductAdminRes | ErrorRes>,
+    res: Response<ProductAdminRes | MessageRes>,
 ) {
     const { id } = req.params;
+    const { title, slug, price, description, categoryId, image } = req.body;
+
+    if (Number(price) < 0) {
+        return res.status(400).json({ message: "Price cannot be negative" });
+    }
+
+    const [existingCategory] = await db
+        .select()
+        .from(categories)
+        .where(eq(categories.id, Number(categoryId)))
+        .limit(1);
+
+    if (!existingCategory) {
+        return res.status(404).json({ message: "Category not found" });
+    }
+
+    const [existingProduct] = await db
+        .select({ id: products.id, title: products.title, slug: products.slug })
+        .from(products)
+        .where(or(eq(products.title, title), eq(products.slug, slug)))
+        .limit(1);
+
+    if (existingProduct && existingProduct.id !== Number(id)) {
+        if (existingProduct.title === title) {
+            return res
+                .status(400)
+                .json({ message: "Product with this title already exists" });
+        }
+        if (existingProduct.slug === slug) {
+            return res
+                .status(400)
+                .json({ message: "Product with this slug already exists" });
+        }
+    }
+
     const [updatedProduct] = await db
         .update(products)
-        .set(req.body)
+        .set({
+            title,
+            slug: slug,
+            price: price,
+            description: description,
+            categoryId: categoryId,
+            image: image,
+        })
         .where(eq(products.id, Number(id)))
         .returning();
 
@@ -179,9 +266,10 @@ export async function updateAdminProduct(
 // DELETE /:id
 export async function deleteAdminProduct(
     req: Request<{ id: string }>,
-    res: Response<ProductAdminRes | ErrorRes>,
+    res: Response<ProductAdminRes | MessageRes>,
 ) {
     const { id } = req.params;
+
     const [deletedProduct] = await db
         .delete(products)
         .where(eq(products.id, Number(id)))

@@ -16,7 +16,7 @@ export const UserRegisterSchema = z.object({
         ),
 });
 
-export interface ErrorRes {
+export interface MessageRes {
     message: string;
 }
 
@@ -37,6 +37,12 @@ type User = {
     createdAt: Date;
 };
 
+type NewUser = {
+    username: string;
+    passwordHash: string;
+    role: string;
+};
+
 export const USER_ROLES = ["admin", "client"] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
@@ -44,6 +50,13 @@ export type UserRole = (typeof USER_ROLES)[number];
 export type UserRes = Pick<User, "id" | "username"> & {
     role: UserRole;
 };
+
+export type UserAdminReq = NewUser;
+
+export type UserUpdateAdminReq = Omit<
+    UserAdminReq,
+    "username" | "passwordHash"
+>;
 
 export type UserAdminRes = Omit<User, "passwordHash">;
 
@@ -73,8 +86,6 @@ type NewProduct = {
     slug: string;
     price: string;
     categoryId: number;
-    id?: number | undefined;
-    createdAt?: Date | undefined;
     image?: string | null | undefined;
     description?: string | null | undefined;
 };
@@ -97,26 +108,21 @@ export interface ProductListRes {
     products: ProductItemRes[];
 }
 
-export type ProductAdminReq = Omit<
-    NewProduct,
-    "id" | "createdAt" | "updatedAt"
->;
+export type ProductAdminReq = NewProduct;
 
 export type ProductAdminRes = Product;
 
 // CATEGORY
 type Category = {
     id: number;
-    createdAt: Date;
-    slug: string;
     name: string;
+    slug: string;
+    createdAt: Date;
 };
 
 type NewCategory = {
-    slug: string;
     name: string;
-    id?: number | undefined;
-    createdAt?: Date | undefined;
+    slug: string;
 };
 
 export type CategoryRes = Pick<Category, "id" | "name" | "slug">;
@@ -131,10 +137,10 @@ export type CategoryAdminReq = Omit<
 // CART
 type CartItem = {
     id: number;
-    updatedAt: Date;
     cartId: number;
     productId: number;
     quantity: number;
+    updatedAt: Date;
 };
 
 export type CartItemRes = Pick<CartItem, "id" | "productId" | "quantity">;

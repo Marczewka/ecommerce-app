@@ -38,7 +38,7 @@ export default function Categories() {
                 <th className="w-[10%] p-3 text-xs">ID</th>
                 <th className="w-[30%] p-3 text-xs">NAME</th>
                 <th className="w-[30%] p-3 text-xs">SLUG</th>
-                <th className="w-[15%] p-3 text-xs">CREATEDAT</th>
+                <th className="w-[15%] p-3 text-xs">CREATED AT</th>
                 <th className="w-[15%] p-3 text-xs">ACTIONS</th>
               </tr>
             </thead>

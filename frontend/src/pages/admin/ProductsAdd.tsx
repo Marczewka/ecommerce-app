@@ -1,7 +1,8 @@
 import { useState } from "react";
 import api from "../../api/axios";
-import type { ProductAdminRes } from "@shared/dtos";
+import type { ProductAdminReq, ProductAdminRes } from "@shared/dtos";
 import { toast } from "sonner";
+import slugify from "slugify";
 import ButtonSave from "./ButtonSave";
 import ButtonCancel from "./ButtonCancel";
 
@@ -14,7 +15,7 @@ export default function ProductsAdd({
   setIsAdding: (value: boolean) => void;
   getProducts: () => void;
 }) {
-  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
@@ -22,7 +23,7 @@ export default function ProductsAdd({
   const [image, setImage] = useState("");
 
   const clearForm = () => {
-    setName("");
+    setTitle("");
     setSlug("");
     setPrice("");
     setDescription("");
@@ -31,32 +32,31 @@ export default function ProductsAdd({
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !slug.trim() || !price || !categoryId) {
-      return toast.error(
-        "Please fill in all required fields (Name, Slug, Price, Category ID)",
-      );
+    if (!title.trim() || !price || !categoryId) {
+      return toast.error("Title, Price and Category ID cannot be empty");
     }
 
-    const toastId = toast.loading("Creating product...");
+    if (Number(price) < 0) {
+      return toast.error("Price cannot be negative");
+    }
 
     try {
       await api.post<ProductAdminRes>("/admin/products", {
-        name,
-        slug,
-        price: Number(price),
-        description,
+        title,
+        slug: slug || slugify(title, { lower: true }),
+        price: price,
+        description: description,
         categoryId: Number(categoryId),
-        image,
-      });
+        image: image,
+      } satisfies ProductAdminReq);
 
-      toast.success("Product created successfully!", { id: toastId });
+      toast.success("Product created successfully!");
 
       setIsAdding(false);
       clearForm();
       fetchProducts();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to create product.", { id: toastId });
     }
   };
 
@@ -72,14 +72,14 @@ export default function ProductsAdd({
           {/* 1. ID (empty) */}
           <td className="p-2"></td>
 
-          {/* 2. Name */}
+          {/* 2. Title */}
           <td className="p-2">
             <input
-              id="name"
+              id="title"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Product Name"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Product Title"
               className="w-full rounded border border-slate-300 bg-white p-2 text-center text-sm focus:outline-indigo-500"
             />
           </td>

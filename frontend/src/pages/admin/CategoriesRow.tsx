@@ -1,4 +1,4 @@
-import type { CategoryAdminRes } from "@shared/dtos";
+import type { CategoryAdminReq, CategoryAdminRes } from "@shared/dtos";
 import { useState } from "react";
 import api from "../../api/axios";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ import ButtonEdit from "./ButtonEdit";
 
 export default function CategoriesRow({
   category,
-  fetchCategories: getCategories,
+  fetchCategories,
 }: {
   category: CategoryAdminRes;
   fetchCategories: () => void;
@@ -25,23 +25,21 @@ export default function CategoriesRow({
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !slug.trim()) {
-      return toast.error("Name and Slug cannot be empty");
+    if (!name.trim()) {
+      return toast.error("Name cannot be empty");
     }
-
-    const toastId = toast.loading("Updating category...");
 
     try {
       await api.put<CategoryAdminRes>(`/admin/categories/${category.id}`, {
         name,
         slug,
-      });
-      toast.success("Category updated successfully!", { id: toastId });
+      } satisfies CategoryAdminReq);
+
+      toast.success("Category updated successfully!");
+      fetchCategories();
       setIsEdited(false);
-      getCategories();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update category.", { id: toastId });
     }
   };
 
@@ -52,15 +50,13 @@ export default function CategoriesRow({
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this category?")) return;
 
-    const toastId = toast.loading("Deleting category...");
-
     try {
       await api.delete<CategoryAdminRes>(`/admin/categories/${id}`);
-      toast.success("Category deleted successfully!", { id: toastId });
-      getCategories();
+
+      toast.success("Category deleted successfully!");
+      fetchCategories();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete category.", { id: toastId });
     }
   };
 

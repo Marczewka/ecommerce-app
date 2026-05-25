@@ -4,11 +4,11 @@ import { db } from "../db/index.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
-import { UserRegisterSchema } from "../../../shared/dtos.js";
+import { USER_ROLES, UserRegisterSchema } from "../../../shared/dtos.js";
 import type {
     AuthReq,
     AuthRes,
-    ErrorRes,
+    MessageRes,
     UserAdminRes,
     UserRole,
     ValidationErrorRes,
@@ -18,7 +18,7 @@ import type { Request, Response } from "express";
 // POST /register
 export async function register(
     req: Request<{}, {}, AuthReq>,
-    res: Response<AuthRes | ErrorRes | ValidationErrorRes>,
+    res: Response<AuthRes | MessageRes | ValidationErrorRes>,
 ) {
     const result = await UserRegisterSchema.safeParseAsync(req.body);
 
@@ -31,7 +31,8 @@ export async function register(
     const [existingUser] = await db
         .select()
         .from(users)
-        .where(eq(users.username, username));
+        .where(eq(users.username, username))
+        .limit(1);
 
     if (existingUser) {
         return res.status(400).json({ message: "Username already taken" });
@@ -39,34 +40,40 @@ export async function register(
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const [newUser] = await db
-        .insert(users)
-        .values({
-            username,
-            passwordHash: hashedPassword,
-        })
-        .returning({
-            id: users.id,
-            username: users.username,
-            role: users.role,
-        });
+    const finalUser = await db.transaction(async (tx) => {
+        const [newUser] = await tx
+            .insert(users)
+            .values({
+                username,
+                passwordHash: hashedPassword,
+            })
+            .returning({
+                id: users.id,
+                username: users.username,
+                role: users.role,
+            });
 
-    if (newUser) {
-        await db.insert(carts).values({
+        if (!newUser) {
+            throw new Error("User creation failed");
+        }
+
+        await tx.insert(carts).values({
             userId: newUser.id,
         });
-    }
 
-    if (!newUser) {
-        return res.status(400).json({ message: "User not created" });
-    }
+        return newUser;
+    });
 
     if (!process.env.JWT_SECRET) {
         throw new Error("JWT_SECRET is missing");
     }
 
     const token = jwt.sign(
-        { id: newUser.id, username: newUser.username, role: newUser.role },
+        {
+            id: finalUser.id,
+            username: finalUser.username,
+            role: finalUser.role,
+        },
         process.env.JWT_SECRET,
         { expiresIn: "1h" },
     );
@@ -74,9 +81,9 @@ export async function register(
     res.json({
         message: "Registration successful",
         user: {
-            id: newUser.id,
-            username: newUser.username,
-            role: newUser.role as UserRole,
+            id: finalUser.id,
+            username: finalUser.username,
+            role: finalUser.role as UserRole,
         },
         token: token,
     });
@@ -85,14 +92,15 @@ export async function register(
 // POST /login
 export async function login(
     req: Request<{}, {}, AuthReq>,
-    res: Response<AuthRes | ErrorRes>,
+    res: Response<AuthRes | MessageRes>,
 ) {
     const { username, password } = req.body;
 
     const [user] = await db
         .select()
         .from(users)
-        .where(eq(users.username, username));
+        .where(eq(users.username, username))
+        .limit(1);
 
     if (!user) {
         return res
@@ -150,10 +158,16 @@ export async function getAdminUsers(
 // PUT /:id
 export async function updateAdminUser(
     req: Request<{ id: string }, {}, { role: UserRole }>,
-    res: Response<UserAdminRes | ErrorRes>,
+    res: Response<UserAdminRes | MessageRes>,
 ) {
     const { id } = req.params;
     const { role } = req.body;
+
+    if (!(USER_ROLES as readonly string[]).includes(role)) {
+        return res.status(400).json({
+            message: `Role must be either ${USER_ROLES.join(" or ")}`,
+        });
+    }
 
     const [updatedUser] = await db
         .update(users)
@@ -176,18 +190,33 @@ export async function updateAdminUser(
 // DELETE /:id
 export async function deleteAdminUser(
     req: Request<{ id: string }>,
-    res: Response<UserAdminRes | ErrorRes>,
+    res: Response<UserAdminRes | MessageRes>,
 ) {
     const { id } = req.params;
-    const [deletedUser] = await db
-        .delete(users)
-        .where(eq(users.id, Number(id)))
-        .returning({
-            id: users.id,
-            username: users.username,
-            role: users.role,
-            createdAt: users.createdAt,
+    const targetUserId = Number(id);
+    const currentAdminId = req.user?.id;
+
+    if (targetUserId === currentAdminId) {
+        return res.status(400).json({
+            message: "You cannot delete your own admin account.",
         });
+    }
+
+    const deletedUser = await db.transaction(async (tx) => {
+        await tx.delete(carts).where(eq(carts.userId, Number(id)));
+
+        const [user] = await tx
+            .delete(users)
+            .where(eq(users.id, Number(id)))
+            .returning({
+                id: users.id,
+                username: users.username,
+                role: users.role,
+                createdAt: users.createdAt,
+            });
+
+        return user;
+    });
 
     if (!deletedUser) {
         return res.status(404).json({ message: "User not found" });

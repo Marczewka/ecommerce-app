@@ -1,7 +1,8 @@
-import type { ProductAdminRes } from "@shared/dtos";
+import type { ProductAdminReq, ProductAdminRes } from "@shared/dtos";
 import { useState } from "react";
 import api from "../../api/axios";
 import { toast } from "sonner";
+import slugify from "slugify";
 import ButtonSave from "./ButtonSave";
 import ButtonCancel from "./ButtonCancel";
 import ButtonDelete from "./ButtonDelete";
@@ -9,7 +10,7 @@ import ButtonEdit from "./ButtonEdit";
 
 export default function ProductsRow({
   product,
-  fetchProducts: getProducts,
+  fetchProducts,
 }: {
   product: ProductAdminRes;
   fetchProducts: () => void;
@@ -33,28 +34,25 @@ export default function ProductsRow({
   };
 
   const handleSave = async () => {
-    if (!title.trim() || !slug.trim() || !price || !categoryId) {
-      return toast.error("Required fields cannot be empty");
+    if (!title.trim() || !price || !categoryId) {
+      return toast.error("Title, Price and Category ID cannot be empty");
     }
-
-    const toastId = toast.loading("Updating product...");
 
     try {
       await api.put<ProductAdminRes>(`/admin/products/${product.id}`, {
         title,
-        slug,
-        price: parseFloat(price),
+        slug: slug || slugify(title, { lower: true }),
+        price: price,
         description,
         categoryId: parseInt(categoryId),
         image,
-      });
+      } satisfies ProductAdminReq);
 
-      toast.success("Product updated successfully!", { id: toastId });
+      toast.success("Product updated successfully!");
       setIsEdited(false);
-      getProducts();
+      fetchProducts();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update product.", { id: toastId });
     }
   };
 
@@ -65,15 +63,12 @@ export default function ProductsRow({
   const handleDelete = async (id: number) => {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
-    const toastId = toast.loading("Deleting product...");
-
     try {
       await api.delete<ProductAdminRes>(`/admin/products/${id}`);
-      toast.success("Product deleted successfully!", { id: toastId });
-      getProducts();
+      toast.success("Product deleted successfully!");
+      fetchProducts();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete product.", { id: toastId });
     }
   };
 

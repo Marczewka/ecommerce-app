@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../../api/axios";
-import type { CategoryAdminRes } from "@shared/dtos";
+import type { CategoryAdminReq, CategoryAdminRes } from "@shared/dtos";
 import { toast } from "sonner";
 import ButtonCancel from "./ButtonCancel";
 import ButtonSave from "./ButtonSave";
@@ -18,29 +18,23 @@ export default function CategoriesAdd({
   const [slug, setSlug] = useState("");
 
   const handleAddSave = async () => {
-    if (!name.trim() || !slug.trim()) {
-      return toast.error("Name and Slug cannot be empty");
+    if (!name.trim()) {
+      return toast.error("Name cannot be empty");
     }
 
-    const savePromise = api.post<CategoryAdminRes>("/admin/categories", {
-      name,
-      slug,
-    });
-
-    toast.promise(savePromise, {
-      loading: "Creating category...",
-      success: () => {
-        setIsAdding(false);
-        setName("");
-        setSlug("");
-        fetchCategories();
-        return "Category created successfully!";
-      },
-      error: (err) => {
-        console.error(err);
-        return "Failed to create category.";
-      },
-    });
+    try {
+      await api.post<CategoryAdminRes>("/admin/categories", {
+        name,
+        slug,
+      } satisfies CategoryAdminReq);
+      setIsAdding(false);
+      setName("");
+      setSlug("");
+      fetchCategories();
+      toast.success("Category created successfully!");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleCancel = () => {

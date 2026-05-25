@@ -13,7 +13,7 @@ import {
 import type { UserRole } from "../../../shared/dtos.js";
 
 export const categories = pgTable("categories", {
-    id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+    id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
     name: varchar("name", { length: 255 }).notNull().unique(),
     slug: varchar("slug", { length: 255 }).notNull().unique(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -22,7 +22,7 @@ export const categories = pgTable("categories", {
 export const products = pgTable(
     "products",
     {
-        id: integer("id").primaryKey().generatedByDefaultAsIdentity(),
+        id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
         title: varchar("title", { length: 255 }).notNull().unique(),
         slug: varchar("slug", { length: 255 }).notNull().unique(),
         price: decimal("price", { precision: 12, scale: 2 }).notNull(),

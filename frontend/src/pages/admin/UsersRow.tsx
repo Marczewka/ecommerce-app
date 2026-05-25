@@ -1,4 +1,5 @@
-import { USER_ROLES, type UserAdminRes } from "@shared/dtos";
+import type { UserAdminRes, UserUpdateAdminReq } from "@shared/dtos";
+import { USER_ROLES } from "@shared/dtos";
 import { useState } from "react";
 import api from "../../api/axios";
 import { toast } from "sonner";
@@ -9,7 +10,7 @@ import ButtonEdit from "./ButtonEdit";
 
 export default function UsersRow({
   user,
-  fetchUsers: getUsers,
+  fetchUsers,
 }: {
   user: UserAdminRes;
   fetchUsers: () => void;
@@ -29,12 +30,13 @@ export default function UsersRow({
     try {
       await api.put<UserAdminRes>(`/admin/users/${user.id}`, {
         role,
-      });
+      } satisfies UserUpdateAdminReq);
+
+      toast.success("User updated successfully!");
+      fetchUsers();
+      setIsEdited(false);
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsEdited(false);
-      getUsers();
     }
   };
 
@@ -43,12 +45,15 @@ export default function UsersRow({
   };
 
   const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this user?")) return;
+
     try {
       await api.delete<UserAdminRes>(`/admin/users/${id}`);
+
+      toast.success("User deleted successfully!");
+      fetchUsers();
     } catch (err) {
       console.error(err);
-    } finally {
-      getUsers();
     }
   };
 

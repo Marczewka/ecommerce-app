@@ -4,14 +4,14 @@ import { eq, and, inArray } from "drizzle-orm";
 import type { Request, Response } from "express";
 import type {
     CartItemRes,
-    ErrorRes,
+    MessageRes,
     ProductItemRes,
 } from "../../../shared/dtos.js";
 
 // GET /my-cart
 export async function getMyCart(
     req: Request,
-    res: Response<ProductItemRes[] | ErrorRes>,
+    res: Response<ProductItemRes[] | MessageRes>,
 ) {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthenticated" });
@@ -39,7 +39,7 @@ export async function getMyCart(
 // POST /cartItems/:id
 export async function createCartItem(
     req: Request<{ id: string }>,
-    res: Response<CartItemRes | ErrorRes>,
+    res: Response<CartItemRes | MessageRes>,
 ) {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthenticated" });
@@ -51,7 +51,8 @@ export async function createCartItem(
     const [cart] = await db
         .select()
         .from(carts)
-        .where(eq(carts.userId, userId));
+        .where(eq(carts.userId, userId))
+        .limit(1);
 
     if (!cart) {
         return res.status(404).json({ message: "Cart not found" });
@@ -75,7 +76,7 @@ export async function createCartItem(
 // PUT /cartItems/:id
 export async function updateCartItem(
     req: Request<{ id: string }>,
-    res: Response<CartItemRes | ErrorRes>,
+    res: Response<CartItemRes | MessageRes>,
 ) {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthenticated" });
@@ -113,7 +114,7 @@ export async function updateCartItem(
 // DELETE /cartItems/:id
 export async function deleteCartItem(
     req: Request<{ id: string }>,
-    res: Response<CartItemRes | ErrorRes>,
+    res: Response<CartItemRes | MessageRes>,
 ) {
     if (!req.user) {
         return res.status(401).json({ message: "Unauthenticated" });

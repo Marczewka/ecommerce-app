@@ -1,9 +1,9 @@
 import axios from "axios";
 import { store } from "../app/store";
 import { logout } from "../features/authSlice";
+import { toast } from "sonner";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
-
 const API_URL = `${BASE_URL}/api`;
 
 const api = axios.create({
@@ -24,18 +24,23 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest.url.includes("/users/login")
-    ) {
+    const serverMessage = error.response?.data?.message;
+    const fallbackMessage = "An unexpected server error occurred.";
+
+    if (status === 401 && !originalRequest.url.includes("/users/login")) {
       store.dispatch(logout());
       window.location.href = "/login";
+      return Promise.reject(error);
     }
 
-    if (error.response?.status === 403) {
+    if (status === 403) {
       window.location.href = "/";
+      return Promise.reject(error);
     }
+
+    toast.error(serverMessage || fallbackMessage);
 
     return Promise.reject(error);
   },

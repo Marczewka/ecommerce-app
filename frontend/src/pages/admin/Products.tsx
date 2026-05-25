@@ -40,9 +40,9 @@ export default function Products() {
                 <th className="w-[12%] p-3 text-xs">SLUG</th>
                 <th className="w-[8%] p-3 text-xs">PRICE</th>
                 <th className="w-[20%] p-3 text-xs">DESCRIPTION</th>
-                <th className="w-[8%] p-3 text-xs">CATID</th>
+                <th className="w-[8%] p-3 text-xs">CATEGORY ID</th>
                 <th className="w-[12%] p-3 text-xs">IMAGE</th>
-                <th className="w-[10%] p-3 text-xs">CREATEDAT</th>
+                <th className="w-[10%] p-3 text-xs">CREATED AT</th>
                 <th className="w-[10%] p-3 text-xs">ACTIONS</th>
               </tr>
             </thead>

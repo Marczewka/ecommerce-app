@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { AuthRes, UserRes } from "@shared/dtos";
 
-type AuthState = {
+export type AuthState = {
   user: UserRes | null;
   token: AuthRes["token"] | null;
   isAuthenticated: boolean;

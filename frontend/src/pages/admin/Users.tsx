@@ -35,7 +35,7 @@ export default function Users() {
                 <th className="w-[10%] p-3 text-xs">ID</th>
                 <th className="w-[35%] p-3 text-xs">USERNAME</th>
                 <th className="w-[20%] p-3 text-xs">ROLE</th>
-                <th className="w-[20%] p-3 text-xs">CREATEDAT</th>
+                <th className="w-[20%] p-3 text-xs">CREATED AT</th>
                 <th className="w-[15%] p-3 text-xs">ACTIONS</th>
               </tr>
             </thead>

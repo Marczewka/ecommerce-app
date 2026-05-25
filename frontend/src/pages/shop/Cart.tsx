@@ -26,12 +26,13 @@ export default function Cart() {
           </span>
           <h2 className="text-2xl font-bold text-slate-800">
             $
-            {cart
-              .reduce(
-                (val, item) => val + Number(item.price) * item.quantity,
+            {(
+              cart.reduce(
+                (val, item) =>
+                  val + Math.round(Number(item.price) * 100) * item.quantity,
                 0,
-              )
-              .toFixed(2)}
+              ) / 100
+            ).toFixed(2)}
           </h2>
         </div>
         <button className="btn-light w-48">Proceed to Checkout</button>

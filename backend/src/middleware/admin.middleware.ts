@@ -1,9 +1,9 @@
 import type { Request, Response, NextFunction } from "express";
-import type { ErrorRes } from "../../../shared/dtos.js";
+import type { MessageRes } from "../../../shared/dtos.js";
 
 export const isAdmin = (
     req: Request,
-    res: Response<ErrorRes>,
+    res: Response<MessageRes>,
     next: NextFunction,
 ) => {
     if (req.user && req.user.role === "admin") {

@@ -5,7 +5,7 @@ import { setCredentials } from "../features/authSlice";
 import { setCart } from "../features/cartSlice";
 import api from "../api/axios";
 import type { ProductItemRes, UserRes } from "@shared/dtos";
-import { Toaster } from "sonner";
+import { toast, Toaster } from "sonner";
 
 export default function RootLayout() {
   const dispatch = useDispatch();
@@ -26,6 +26,11 @@ export default function RootLayout() {
       } catch (err) {
         console.error(err);
         localStorage.removeItem("token");
+      }
+
+      if (sessionStorage.getItem("seed_success") === "true") {
+        toast.success("Database seeded successfully!");
+        sessionStorage.removeItem("seed_success");
       }
     };
 
