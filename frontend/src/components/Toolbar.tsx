@@ -13,12 +13,12 @@ export default function Toolbar({
   path: string;
 }) {
   const navigate = useNavigate();
-  const handleSeedDatabase = async () => {
-    if (!confirm("Are you sure you want to seed the database?")) return;
+  const handleRestartDatabase = async () => {
+    if (!confirm("Are you sure you want to restart the database?")) return;
 
     try {
       await api.post<MessageRes>("/admin/seed");
-      sessionStorage.setItem("seed_success", "true");
+      sessionStorage.setItem("restart_success", "true");
       navigate(0);
     } catch (err) {
       console.error(err);
@@ -36,10 +36,10 @@ export default function Toolbar({
       </div>
 
       <button
-        className="btn-admin cursor-pointer justify-self-center"
-        onClick={handleSeedDatabase}
+        className="cursor-pointer justify-self-center rounded bg-red-600 px-3 py-0.5 font-medium text-white transition-colors hover:bg-red-700"
+        onClick={handleRestartDatabase}
       >
-        Seed Database
+        Restart Database
       </button>
 
       <Link to={path} className="btn-admin justify-self-end">

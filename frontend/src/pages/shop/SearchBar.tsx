@@ -11,11 +11,11 @@ export default function SearchBar() {
     e.preventDefault();
     const newParams = new URLSearchParams(searchParams);
 
-    if (query.trim()) {
-      newParams.set("search", query);
-    } else {
-      newParams.delete("search");
+    if (!query.trim()) {
+      return;
     }
+
+    newParams.set("search", query);
 
     const isProductsPage = location.pathname === "/products";
     const isCategoryPage = location.pathname.startsWith("/categories");
@@ -31,19 +31,6 @@ export default function SearchBar() {
 
   const handleClear = () => {
     setQuery("");
-    const newParams = new URLSearchParams(searchParams);
-    newParams.delete("search");
-
-    const isProductsPage = location.pathname === "/products";
-    const isCategoryPage = location.pathname.startsWith("/categories");
-
-    const targetPath =
-      isProductsPage || isCategoryPage ? location.pathname : "/products";
-
-    navigate({
-      pathname: targetPath,
-      search: newParams.toString(),
-    });
   };
 
   return (

@@ -7,6 +7,8 @@ import ButtonSave from "./ButtonSave";
 import ButtonCancel from "./ButtonCancel";
 import ButtonDelete from "./ButtonDelete";
 import ButtonEdit from "./ButtonEdit";
+import { useDispatch } from "react-redux";
+import { removeItem } from "../../features/cartSlice";
 
 export default function ProductsRow({
   product,
@@ -22,6 +24,7 @@ export default function ProductsRow({
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [image, setImage] = useState("");
+  const dispatch = useDispatch();
 
   const handleEdit = (product: ProductAdminRes) => {
     setTitle(product.title);
@@ -66,6 +69,7 @@ export default function ProductsRow({
     try {
       await api.delete<ProductAdminRes>(`/admin/products/${id}`);
       toast.success("Product deleted successfully!");
+      dispatch(removeItem(product.id));
       fetchProducts();
     } catch (err) {
       console.error(err);

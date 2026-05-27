@@ -73,7 +73,11 @@ export default function CartItem({ product }: { product: ProductItemRes }) {
       <div className="flex w-1/5 flex-col items-end justify-between p-4">
         <div className="flex flex-col items-center gap-2">
           <div className="text-2xl font-bold text-slate-900">
-            ${Number(product.price) * quantity}
+            $
+            {(
+              (Math.round(Number(product.price) * 100) * quantity) /
+              100
+            ).toFixed(2)}
           </div>
 
           <div

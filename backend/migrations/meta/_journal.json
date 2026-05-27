@@ -15,6 +15,13 @@
       "when": 1778610831042,
       "tag": "0001_empty_lord_hawal",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779894933115,
+      "tag": "0002_lying_zeigeist",
+      "breakpoints": true
     }
   ]
 }
