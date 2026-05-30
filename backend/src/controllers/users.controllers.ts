@@ -4,7 +4,7 @@ import { db } from "../db/index.js";
 import { z } from "zod";
 import jwt from "jsonwebtoken";
 import { eq } from "drizzle-orm";
-import { USER_ROLES, UserRegisterSchema } from "@shared/dtos.js";
+import { USER_ROLES, UserRegisterSchema } from "../../../shared/dtos.js";
 import type {
     AuthReq,
     AuthRes,
@@ -12,7 +12,7 @@ import type {
     UserAdminRes,
     UserRole,
     ValidationErrorRes,
-} from "@shared/dtos.js";
+} from "../../../shared/dtos.js";
 import type { Request, Response } from "express";
 
 // POST /register

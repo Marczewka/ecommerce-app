@@ -10,7 +10,7 @@ import {
     unique,
     varchar,
 } from "drizzle-orm/pg-core";
-import type { UserRole } from "@shared/dtos.js";
+import type { UserRole } from "../../../shared/dtos.js";
 
 export const categories = pgTable("categories", {
     id: integer("id").primaryKey().generatedAlwaysAsIdentity(),

@@ -8,7 +8,7 @@ import type {
     ProductListRes,
     ProductAdminReq,
     ProductAdminRes,
-} from "@shared/dtos.js";
+} from "../../../shared/dtos.js";
 import slugify from "slugify";
 import { or } from "drizzle-orm";
 

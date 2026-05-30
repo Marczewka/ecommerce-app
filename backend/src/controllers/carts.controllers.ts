@@ -2,7 +2,11 @@ import { db } from "../db/index.js";
 import { carts, cartItems, products } from "../db/schema.js";
 import { eq, and, inArray } from "drizzle-orm";
 import type { Request, Response } from "express";
-import type { CartItemRes, MessageRes, ProductItemRes } from "@shared/dtos.js";
+import type {
+    CartItemRes,
+    MessageRes,
+    ProductItemRes,
+} from "../../../shared/dtos.js";
 
 // GET /my-cart
 export async function getMyCart(

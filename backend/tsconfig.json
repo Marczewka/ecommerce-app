@@ -9,10 +9,7 @@
         "types": ["node"],
         "sourceMap": true,
         "declaration": true,
-        "declarationMap": true,
-        "paths": {
-            "@shared/*": ["../shared/*"]
-        }
+        "declarationMap": true
     },
     "include": ["./src"],
     "references": [{ "path": "../shared" }]

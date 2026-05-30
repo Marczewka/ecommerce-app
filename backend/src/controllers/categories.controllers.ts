@@ -7,7 +7,7 @@ import type {
     CategoryAdminRes,
     CategoryRes,
     MessageRes,
-} from "@shared/dtos.js";
+} from "../../../shared/dtos.js";
 import slugify from "slugify";
 import { or } from "drizzle-orm";
 
