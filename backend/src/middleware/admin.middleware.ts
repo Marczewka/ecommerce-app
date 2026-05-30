@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import type { MessageRes } from "../../../shared/dtos.js";
+import type { MessageRes } from "@shared/dtos.js";
 
 export const isAdmin = (
     req: Request,

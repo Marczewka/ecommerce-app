@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { MessageRes } from "../../../shared/dtos.js";
+import type { MessageRes } from "@shared/dtos.js";
 import { db } from "../db/index.js";
 import { carts, categories, products, users } from "../db/schema.js";
 import slugify from "slugify";

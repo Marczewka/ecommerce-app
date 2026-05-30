@@ -1,4 +1,4 @@
-import type { UserRes } from "../../shared/dtos.ts";
+import type { UserRes } from "@shared/dtos.ts";
 import { User } from "./db/schema";
 
 declare global {
