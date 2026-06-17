@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "../loadEnv.js";
 import { carts, categories, products, users } from "./schema.js";
 import slugify from "slugify";
 import bcrypt from "bcrypt";

@@ -18,7 +18,7 @@ export default function Toolbar({
 
     try {
       await api.post<MessageRes>("/admin/seed");
-      sessionStorage.setItem("restart_success", "true");
+      sessionStorage.setItem("seed_success", "true");
       navigate(0);
     } catch (err) {
       console.error(err);
