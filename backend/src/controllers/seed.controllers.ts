@@ -5,6 +5,7 @@ import { carts, categories, products, users } from "../db/schema.js";
 import slugify from "slugify";
 import bcrypt from "bcrypt";
 import { sql } from "drizzle-orm";
+import mockData from "../db/mockData.json" with { type: "json" };
 
 // ADMIN
 // POST
@@ -12,29 +13,8 @@ export async function seed(
     _req: Request,
     res: Response<{ message: string } | MessageRes>,
 ) {
-    console.log("Fetching data from FakeStoreAPI...");
-    const productsResponse = await fetch("https://fakestoreapi.com/products", {
-        headers: {
-            "User-Agent":
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-            Accept: "application/json, text/plain, */*",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Cache-Control": "no-cache",
-            Pragma: "no-cache",
-            "Sec-Fetch-Dest": "empty",
-            "Sec-Fetch-Mode": "cors",
-            "Sec-Fetch-Site": "cross-site",
-        },
-    });
-
-    if (!productsResponse.ok) {
-        throw new Error(
-            `Failed to fetch mock data: ${productsResponse.statusText}`,
-        );
-    }
-
-    const productsData = (await productsResponse.json()) as any[];
+    console.log("Loading mock data...");
+    const productsData = mockData as any[];
 
     await db.transaction(async (tx) => {
         console.log("Clearing existing data...");

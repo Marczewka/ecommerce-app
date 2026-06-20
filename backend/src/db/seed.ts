@@ -4,15 +4,32 @@ import slugify from "slugify";
 import bcrypt from "bcrypt";
 import { sql } from "drizzle-orm";
 import { db } from "./index.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function seed() {
     try {
-        console.log("Fetching data...");
+        console.log("Fetching data from FakeStoreAPI...");
         const productsResponse = await fetch(
             "https://fakestoreapi.com/products",
         );
 
+        if (!productsResponse.ok) {
+            throw new Error(`Failed to fetch: ${productsResponse.statusText}`);
+        }
+
         const productsData = (await productsResponse.json()) as any[];
+
+        const mockDataPath = path.join(__dirname, "./mockData.json");
+        fs.writeFileSync(
+            mockDataPath,
+            JSON.stringify(productsData, null, 2),
+            "utf-8",
+        );
+        console.log(`Saved ${productsData.length} products to mockData.json`);
 
         await db.transaction(async (tx) => {
             console.log("Clearing existing data...");
@@ -21,9 +38,12 @@ async function seed() {
             );
 
             console.log("Seeding categories...");
-            const uniqueCategories = [
-                ...new Set(productsData.map((p) => p.category)),
-            ];
+            const uniqueCategories = Array.from(
+                new Set(productsData.map((p) => p.category).filter(Boolean)),
+            );
+
+            console.log(`Found ${uniqueCategories.length} unique categories`);
+
             const insertedCategories = await tx
                 .insert(categories)
                 .values(
@@ -35,7 +55,7 @@ async function seed() {
                 .returning();
 
             const categoryMap = Object.fromEntries(
-                insertedCategories.map((c) => [c.name, c.id]),
+                (insertedCategories || []).map((c) => [c.name, c.id]),
             );
 
             console.log("Seeding products...");
