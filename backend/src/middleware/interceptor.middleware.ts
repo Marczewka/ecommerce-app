@@ -1,4 +1,3 @@
-import { error } from "console";
 import type { Request, Response, NextFunction } from "express";
 
 export const interceptor = (
@@ -8,7 +7,7 @@ export const interceptor = (
     _next: NextFunction,
 ) => {
     console.error(err);
-    if (err.cause.code === "23503") {
+    if (err?.cause?.code === "23503") {
         return res.status(400).json({
             message: err.cause.detail,
         });

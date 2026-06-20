@@ -13,7 +13,12 @@ export async function seed(
     res: Response<{ message: string } | MessageRes>,
 ) {
     console.log("Fetching data from FakeStoreAPI...");
-    const productsResponse = await fetch("https://fakestoreapi.com/products");
+    const productsResponse = await fetch("https://fakestoreapi.com/products", {
+        headers: {
+            "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        },
+    });
 
     if (!productsResponse.ok) {
         throw new Error(
